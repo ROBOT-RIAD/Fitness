@@ -5,6 +5,10 @@ from drf_extra_fields.fields import Base64ImageField as ExtendedFileField
 # jwt
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
+
+
+
+
 class RegisterSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(required= True)
     password = serializers.CharField(write_only=True)
@@ -23,6 +27,10 @@ class RegisterSerializer(serializers.ModelSerializer):
         Profile.objects.create(user=user)
         return user
     
+
+
+
+
 
 
 
@@ -70,6 +78,9 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 
 
+
+
+
 class ExtendedFileField(serializers.FileField):
     def to_representation(self, value):
         if value:
@@ -79,6 +90,25 @@ class ExtendedFileField(serializers.FileField):
                 return request.build_absolute_uri(url)
             return url
         return None
+
+
+
+
+
+
+
+
+class ExtendedFileField(serializers.FileField):
+    def to_representation(self, value):
+        if value:
+            request = self.context.get('request')
+            url = getattr(value, 'url', value)
+            if request is not None:
+                return request.build_absolute_uri(url)
+            return url
+        return None
+
+
 
 
 class ProfileSerializer(serializers.ModelSerializer):
@@ -104,3 +134,32 @@ class ProfileSerializer(serializers.ModelSerializer):
             setattr(instance, attr, value)
         instance.save()
         return instance
+    
+
+
+
+class SendOTPSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate_email(self, value):
+        if not User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("User with this email does not exist.")
+        return value
+    
+
+
+class VerifyOTPSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    otp = serializers.CharField(max_length=4)
+
+
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+    new_password = serializers.CharField(write_only=True, min_length=4)
+    confirm_password = serializers.CharField(write_only=True, min_length=4)
+
+    def validate(self, attrs):
+        if attrs['new_password'] != attrs['confirm_password']:
+            raise serializers.ValidationError({"confirm_password": "Passwords do not match."})
+        return attrs

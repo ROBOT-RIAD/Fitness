@@ -40,6 +40,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('accounts.urls')),
     path('chat/', include('AiChat.urls')),
+    path('adminapi/', include('adminapi.urls')),
 
 
     # Swagger/OpenAPI URLs

@@ -1,16 +1,20 @@
 from django.shortcuts import render
 from rest_framework import generics,viewsets,status
 from rest_framework.generics import CreateAPIView
-from .models import User
+from .models import User,Profile,PasswordResetOTP
 from .models import Profile
-from .serializers import RegisterSerializer,CustomTokenObtainPairSerializer,ProfileSerializer
+from .serializers import RegisterSerializer,CustomTokenObtainPairSerializer,ProfileSerializer,SendOTPSerializer,VerifyOTPSerializer,ResetPasswordSerializer
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.views import APIView
+from django.core.mail import send_mail
+from django.conf import settings
 
 #$swagger
 from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 #jwt
 from rest_framework.permissions import AllowAny,IsAuthenticated
@@ -124,36 +128,139 @@ class ProfileViewSet(viewsets.ViewSet):
 
 
 
-# class GetProfileView(generics.RetrieveAPIView):
-#     serializer_class = ProfileSerializer
-#     permission_classes = [IsAuthenticated]
 
-#     def get_object(self):
-#         return self.request.user.profile
+class SendOTPView(APIView):
+    permission_classes = [AllowAny]
+ 
+    @swagger_auto_schema(
+        request_body=SendOTPSerializer,
+        tags=["Forgot Password"],
+        operation_summary="Send OTP to email",
+        responses={200: openapi.Response('OTP sent'), 400: 'Bad Request'}
+    )
+    def post(self, request):
+        serializer = SendOTPSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-#     @swagger_auto_schema(
-#         operation_description="Retrieve the current user's profile.",
-#         responses={200: ProfileSerializer()}
-#     )
-#     def get(self, request, *args, **kwargs):
-#         return self.retrieve(request, *args, **kwargs)
+        try:
+            email = serializer.validated_data['email']
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
-# class UpdateProfileView(generics.UpdateAPIView):
-#     serializer_class = ProfileSerializer
-#     permission_classes = [IsAuthenticated]
-
-#     def get_object(self):
-#         return self.request.user.profile
-
-#     @swagger_auto_schema(
-#         operation_description="Update the current user's profile.",
-#         request_body=ProfileSerializer,
-#         responses={200: ProfileSerializer()}
-#     )
-#     def patch(self, request, *args, **kwargs):
-#         return self.partial_update(request, *args, **kwargs)
+        try:
+            otp_record = PasswordResetOTP.objects.create(user=user)
+        
+            # print(otp_record.otp)
+            print(email)
 
 
+            # Send OTP via email
+            send_mail(
+            subject='Your OTP Code',
+            message=f'Your OTP is: {otp_record.otp}',
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[email],
+            )
+
+            return Response({
+                "message": "OTP sent to your email.",
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": "Failed to send OTP."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+
+
+
+
+
+
+class VerifyOTPView(APIView):
+    permission_classes = [AllowAny]
+
+    @swagger_auto_schema(
+        request_body=VerifyOTPSerializer,
+        tags=["Forgot Password"],
+        operation_summary="Verify OTP",
+        responses={200: openapi.Response('OTP verified'), 400: 'Invalid OTP'}
+    )
+
+    def post(self, request):
+        serializer = VerifyOTPSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        email = serializer.validated_data['email']
+        otp = serializer.validated_data['otp']
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            otp_record = PasswordResetOTP.objects.filter(
+                user=user, otp=otp, is_verified=False
+            ).latest('created_at')
+        except PasswordResetOTP.DoesNotExist:
+            return Response({"error": "Invalid or expired OTP."}, status=status.HTTP_400_BAD_REQUEST)
+
+        otp_record.is_verified = True
+        otp_record.save()
+
+        return Response({"message": "OTP verified successfully."}, status=status.HTTP_200_OK)
+    
+
+
+
+
+
+
+class ResetPasswordView(APIView):
+    permission_classes = [AllowAny] 
+
+    @swagger_auto_schema(
+        request_body=ResetPasswordSerializer,
+        manual_parameters=[
+            openapi.Parameter(
+                'email',
+                openapi.IN_QUERY,
+                description="Email address to reset password for",
+                type=openapi.TYPE_STRING,
+                required=True
+            )
+        ],
+        tags=["Forgot Password"],
+        operation_summary="Reset password after OTP verification",
+        responses={200: openapi.Response('Password reset successful'), 400: 'Bad Request'}
+    )
+
+    def post(self, request):
+        serializer = ResetPasswordSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        email = request.query_params.get('email')
+        if not email:
+            return Response({"error": "Email is required in query params."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            otp_record = PasswordResetOTP.objects.filter(
+                user=user, is_verified=True
+            ).latest('created_at')
+        except PasswordResetOTP.DoesNotExist:
+            return Response({"error": "OTP not verified or expired."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user.set_password(serializer.validated_data['new_password'])
+            user.save()
+            otp_record.delete()
+            return Response({"message": "Password has been reset successfully."}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error" : e}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
