@@ -4,7 +4,9 @@ from rest_framework.permissions import IsAuthenticated
 from .models import Recipe
 from .serializers import RecipeSerializer
 from accounts.permissions import IsAdminRole
-
+from rest_framework.filters import SearchFilter
+from django_filters.rest_framework import DjangoFilterBackend
+from .pagination import CustomPageNumberPagination
 # Create your views here.
 
 
@@ -17,6 +19,10 @@ class RecipeAdminViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     permission_classes = [IsAuthenticated, IsAdminRole]
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    search_fields = ['recipe_name']
+    filterset_fields = ['for_time']
+    pagination_class = CustomPageNumberPagination
 
     @swagger_auto_schema(operation_summary="List all recipes (Admin only)", tags=["Recipe"])
     def list(self, request, *args, **kwargs):
