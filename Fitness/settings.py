@@ -55,7 +55,8 @@ INSTALLED_APPS = [
     'AiChat',
     'recipe',
     'adminapi',
-    'workout'
+    'workout',
+    'termsandpolicy'
 ]
 
 MIDDLEWARE = [

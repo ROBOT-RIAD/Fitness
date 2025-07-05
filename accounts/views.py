@@ -15,6 +15,7 @@ from django.conf import settings
 #$swagger
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from rest_framework.parsers import MultiPartParser, FormParser
 
 #jwt
 from rest_framework.permissions import AllowAny,IsAuthenticated
@@ -84,6 +85,7 @@ class CustomTokenRefreshView(TokenRefreshView):
 
 class ProfileViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
 
     def get_object(self):
         # Ensure a Profile exists for the user

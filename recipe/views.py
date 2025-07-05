@@ -7,6 +7,7 @@ from accounts.permissions import IsAdminRole
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from .pagination import CustomPageNumberPagination
+from rest_framework.parsers import MultiPartParser, FormParser
 # Create your views here.
 
 
@@ -23,6 +24,7 @@ class RecipeAdminViewSet(ModelViewSet):
     search_fields = ['recipe_name']
     filterset_fields = ['for_time']
     pagination_class = CustomPageNumberPagination
+    parser_classes = [MultiPartParser, FormParser]
 
     @swagger_auto_schema(operation_summary="List all recipes (Admin only)", tags=["Recipe"])
     def list(self, request, *args, **kwargs):

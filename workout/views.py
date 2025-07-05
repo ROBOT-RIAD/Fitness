@@ -8,6 +8,7 @@ from .models import Workout
 from .serializers import WorkoutSerializer
 from accounts.permissions import IsAdminRole  # Assuming you placed IsAdminRole there
 from .pagination import CustomPageNumberPagination 
+from rest_framework.parsers import MultiPartParser, FormParser
 
 # Create your views here.
 
@@ -19,7 +20,8 @@ class WorkoutAdminViewSet(ModelViewSet):
     filter_backends = [DjangoFilterBackend, SearchFilter]
     search_fields = ['workout_name']
     filterset_fields = ['for_body_part', 'workout_type']
-    pagination_class = CustomPageNumberPagination  # Optional
+    pagination_class = CustomPageNumberPagination  
+    parser_classes = [MultiPartParser, FormParser]
 
     @swagger_auto_schema(operation_summary="List all workouts (Admin only)", tags=["Workout"])
     def list(self, request, *args, **kwargs):
