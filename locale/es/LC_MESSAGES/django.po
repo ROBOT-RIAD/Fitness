@@ -1,0 +1,248 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-07-08 14:05+0600\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? "
+"1 : 2;\n"
+#: .\accounts\constants.py:111
+msgid "Admin"
+msgstr ""
+
+#: .\accounts\constants.py:112
+msgid "User"
+msgstr ""
+
+#: .\accounts\constants.py:116
+msgid "Male"
+msgstr ""
+
+#: .\accounts\constants.py:117
+msgid "Female"
+msgstr "Femenina"
+
+#: .\accounts\constants.py:121
+msgid "Beginners"
+msgstr ""
+
+#: .\accounts\constants.py:122
+msgid "Basic"
+msgstr ""
+
+#: .\accounts\constants.py:123
+msgid "Intermediate"
+msgstr ""
+
+#: .\accounts\constants.py:124
+msgid "High"
+msgstr ""
+
+#: .\accounts\constants.py:128
+msgid "At Home"
+msgstr ""
+
+#: .\accounts\constants.py:129
+msgid "At Gym"
+msgstr ""
+
+#: .\accounts\constants.py:130
+msgid "Martial Arts"
+msgstr ""
+
+#: .\accounts\constants.py:131 .\accounts\constants.py:151
+msgid "Running"
+msgstr ""
+
+#: .\accounts\constants.py:132
+msgid "Other Sports"
+msgstr ""
+
+#: .\accounts\constants.py:136
+msgid "Dumbbells"
+msgstr ""
+
+#: .\accounts\constants.py:137
+msgid "Resistance Bands"
+msgstr ""
+
+#: .\accounts\constants.py:138
+msgid "Pull-up Bar"
+msgstr ""
+
+#: .\accounts\constants.py:139
+msgid "Bench"
+msgstr ""
+
+#: .\accounts\constants.py:140
+msgid "No Equipment"
+msgstr ""
+
+#: .\accounts\constants.py:144
+msgid "Barbell"
+msgstr ""
+
+#: .\accounts\constants.py:145
+msgid "Squat Rack"
+msgstr ""
+
+#: .\accounts\constants.py:146
+msgid "Cable Machine"
+msgstr ""
+
+#: .\accounts\constants.py:147
+msgid "Smith Machine"
+msgstr ""
+
+#: .\accounts\constants.py:152
+msgid "Football"
+msgstr ""
+
+#: .\accounts\constants.py:153
+msgid "Swimming"
+msgstr ""
+
+#: .\accounts\constants.py:157
+msgid "Lose Fat"
+msgstr ""
+
+#: .\accounts\constants.py:158
+#, python-format
+msgid "Gain Muscle (only if % is already low)"
+msgstr ""
+
+#: .\accounts\constants.py:159 .\accounts\constants.py:202
+msgid "Maintenance"
+msgstr ""
+
+#: .\accounts\constants.py:163
+msgid "1 Month"
+msgstr ""
+
+#: .\accounts\constants.py:164
+msgid "2 Month"
+msgstr ""
+
+#: .\accounts\constants.py:165
+msgid "3 Month"
+msgstr ""
+
+#: .\accounts\constants.py:166
+msgid "6 Month"
+msgstr ""
+
+#: .\accounts\constants.py:167
+msgid "1 Year"
+msgstr ""
+
+#: .\accounts\constants.py:171
+msgid "Keto"
+msgstr ""
+
+#: .\accounts\constants.py:172
+msgid "Paleo"
+msgstr ""
+
+#: .\accounts\constants.py:173
+msgid "Vegetarian"
+msgstr ""
+
+#: .\accounts\constants.py:174
+msgid "Vegan"
+msgstr ""
+
+#: .\accounts\constants.py:175
+msgid "Gluten-Free"
+msgstr ""
+
+#: .\accounts\constants.py:176
+msgid "No Preferences"
+msgstr ""
+
+#: .\accounts\constants.py:180
+msgid "Nuts"
+msgstr ""
+
+#: .\accounts\constants.py:181
+msgid "Dairy"
+msgstr ""
+
+#: .\accounts\constants.py:182
+msgid "Shellfish"
+msgstr ""
+
+#: .\accounts\constants.py:183
+msgid "Eggs"
+msgstr ""
+
+#: .\accounts\constants.py:184
+msgid "No Allergies"
+msgstr ""
+
+#: .\accounts\constants.py:188
+msgid "Egg"
+msgstr ""
+
+#: .\accounts\constants.py:189
+msgid "Milk"
+msgstr ""
+
+#: .\accounts\constants.py:190
+msgid "Fish"
+msgstr ""
+
+#: .\accounts\constants.py:194
+msgid "Diabetes"
+msgstr ""
+
+#: .\accounts\constants.py:195
+msgid "High Blood Pressure"
+msgstr ""
+
+#: .\accounts\constants.py:196
+msgid "Heart Disease"
+msgstr ""
+
+#: .\accounts\constants.py:200
+msgid "Weight Loss"
+msgstr ""
+
+#: .\accounts\constants.py:201
+msgid "Weight Gain"
+msgstr ""
+
+#: .\accounts\constants.py:206
+msgid "3 Meals"
+msgstr ""
+
+#: .\accounts\constants.py:207
+msgid "4 Meals"
+msgstr ""
+
+#: .\accounts\constants.py:208
+msgid "5 Meals"
+msgstr ""
+
+#: .\accounts\constants.py:209
+msgid "6 Meals"
+msgstr ""
+
+#: .\accounts\constants.py:210
+msgid "7 Meals"
+msgstr ""
+
+#: .\accounts\constants.py:211
+msgid "8 Meals"
+msgstr ""

@@ -12,7 +12,7 @@ class IsAdminRole(BasePermission):
 
 
 
-class IsChefRole(BasePermission):
+class IsUserRole(BasePermission):
     """
     Allows access only to users with user role.
     """

@@ -15,13 +15,18 @@ from django.conf import settings
 #$swagger
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.parsers import MultiPartParser, FormParser,JSONParser
+
 
 #jwt
 from rest_framework.permissions import AllowAny,IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView,TokenRefreshView
 
+#openai
+import openai
+openai.api_key = settings.OPENAI_API_KEY
+import json
 
 # Create your views here.
 
@@ -85,7 +90,7 @@ class CustomTokenRefreshView(TokenRefreshView):
 
 class ProfileViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
-    parser_classes = [MultiPartParser, FormParser]
+    parser_classes = [MultiPartParser, FormParser,JSONParser]
 
     def get_object(self):
         # Ensure a Profile exists for the user
@@ -125,6 +130,108 @@ class ProfileViewSet(viewsets.ViewSet):
         profile = self.get_object()
         profile.delete()
         return Response({"detail": "Profile deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+    
+
+
+    @swagger_auto_schema(
+        method='post',
+        operation_id="ai_recommended_data",
+        operation_summary="Get AI-generated health recommendations",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=[],
+        ),
+        responses={
+            200: openapi.Response(
+                description="AI-generated health data",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "perfect_weight_kg": openapi.Schema(type=openapi.TYPE_NUMBER),
+                        "abdominal": openapi.Schema(type=openapi.TYPE_NUMBER),
+                        "triceps": openapi.Schema(type=openapi.TYPE_NUMBER),
+                        "subscapular": openapi.Schema(type=openapi.TYPE_NUMBER),
+                        "suprailiac": openapi.Schema(type=openapi.TYPE_NUMBER),
+                        "total_calories_per_day": openapi.Schema(type=openapi.TYPE_INTEGER),
+                        "water_need_liters_per_day": openapi.Schema(type=openapi.TYPE_NUMBER),
+                        "sleep_need_hours_per_day": openapi.Schema(type=openapi.TYPE_INTEGER)
+                    }
+                )
+            ),
+            500: "OpenAI failed"
+        }
+    )
+    @action(detail=False, methods=['post'])
+    def ai_recommended_data(self, request):
+        profile = self.get_object()
+
+        # Use validated data if passed, fallback to profile values
+        data = request.data
+        
+        input_data = {
+                "fullname": data.get("fullname", profile.fullname),
+                "gender": data.get("gender", profile.gender),
+                "date_of_birth": str(data.get("date_of_birth", profile.date_of_birth)),
+
+                "weight": data.get("weight", profile.weight),
+                "height": data.get("height", profile.height),
+                "abdominal": data.get("abdominal", profile.abdominal),
+                "sacroiliac": data.get("sacroiliac", profile.sacroiliac),
+                "subscapularis": data.get("subscapularis", profile.subscapularis),
+                "triceps": data.get("triceps", profile.triceps),
+
+                "fitness_level": data.get("fitness_level", profile.fitness_level),
+                "trainer": data.get("trainer", profile.trainer),
+
+                "at_home": data.get("at_home", profile.at_home),
+                "at_gym": data.get("at_gym", profile.at_gym),
+                "martial_arts": data.get("martial_arts", profile.martial_arts),
+                "running": data.get("running", profile.running),
+                "other_sports": data.get("other_sports", profile.other_sports),
+
+                "train_duration": data.get("train_duration", profile.train_duration),
+                "interested_workout": data.get("interested_workout", profile.interested_workout),
+                "injuries_discomfort": data.get("injuries_discomfort", profile.injuries_discomfort),
+
+                "routine_duration": data.get("routine_duration", profile.routine_duration),
+                "dietary_preferences": data.get("dietary_preferences", profile.dietary_preferences),
+                "allergies": data.get("allergies", profile.allergies),
+                "food_preference": data.get("food_preference", profile.food_preference),
+                "medical_conditions": data.get("medical_conditions", profile.medical_conditions),
+                "fitness_goals": data.get("fitness_goals", profile.fitness_goals),
+                "lifestyle_habits": data.get("lifestyle_habits", profile.lifestyle_habits),
+
+        }
+
+
+        prompt = f"""
+    You are a fitness expert. Based on this JSON profile:
+    {json.dumps(input_data, indent=2)}
+
+    Return JSON with only:
+    - perfect_weight_kg
+    - abdominal
+    - triceps
+    - subscapular
+    - suprailiac (same as sacroiliac)
+    - total_calories_per_day
+    - water_need_liters_per_day
+    - sleep_need_hours_per_day
+
+    Use only raw JSON. Do not explain anything.
+    """
+
+        try:
+            response = openai.ChatCompletion.create(
+                model="gpt-4",
+                temperature=0,
+                messages=[{"role": "user", "content": prompt}]
+            )
+            content = response.choices[0].message.content.strip()
+            recommended_data = json.loads(content)
+            return Response(recommended_data, status=200)
+        except Exception as e:
+            return Response({"error": "OpenAI failed", "detail": str(e)}, status=500)
 
 
 
