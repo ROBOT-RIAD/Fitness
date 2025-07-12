@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User,Profile
+from .models import User,Profile,ProfileSpanish
 from .utils.fields import MultiSelectListField
 from drf_extra_fields.fields import Base64ImageField as ExtendedFileField
 # jwt
@@ -25,6 +25,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             password=password,
         )
         Profile.objects.create(user=user)
+        ProfileSpanish.objects.create(user=user)
         return user
     
 
@@ -126,6 +127,31 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Profile
+        fields = '__all__'
+        read_only_fields = ['user']
+
+    def update(self, instance, validated_data):
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance
+    
+
+
+class ProfileSpanishSerializer(serializers.ModelSerializer):
+    image = ExtendedFileField(required=False)
+    at_home = MultiSelectListField(required=False)
+    at_gym = MultiSelectListField(required=False)
+    martial_arts = MultiSelectListField(required=False)
+    running = MultiSelectListField(required=False)
+    other_sports = MultiSelectListField(required=False)
+    allergies = MultiSelectListField(required=False)
+    food_preference = MultiSelectListField(required=False)
+    medical_conditions = MultiSelectListField(required=False)
+    fitness_goals = MultiSelectListField(required=False)
+
+    class Meta:
+        model = ProfileSpanish
         fields = '__all__'
         read_only_fields = ['user']
 

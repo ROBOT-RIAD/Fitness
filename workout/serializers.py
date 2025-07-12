@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Workout
+from .models import Workout,WorkoutSpanish
 
 
 class ExtendedFileField(serializers.FileField):
@@ -16,5 +16,16 @@ class WorkoutSerializer(serializers.ModelSerializer):
     image = ExtendedFileField(required=False)
     class Meta:
         model = Workout
-        fields = ['id','workout_name','time_needed','for_body_part','workout_type','calories_burn','equipment_needed','tag','image','benefits','created_at','updated_at',]
+        fields = ['id','unique_id','workout_name','time_needed','for_body_part','workout_type','calories_burn','equipment_needed','tag','image','benefits','created_at','updated_at',]
         read_only_fields = ['id', 'created_at', 'updated_at']
+        extra_kwargs = {'unique_id': {'required': False}}
+
+
+
+class WorkoutSpanishSerializer(serializers.ModelSerializer):
+    image = ExtendedFileField(required=False)
+    class Meta:
+        model = WorkoutSpanish
+        fields = ['id','unique_id','workout_name','time_needed','for_body_part','workout_type','calories_burn','equipment_needed','tag','image','benefits','created_at','updated_at',]
+        read_only_fields = ['id', 'created_at', 'updated_at']
+        extra_kwargs = {'unique_id': {'required': False}}

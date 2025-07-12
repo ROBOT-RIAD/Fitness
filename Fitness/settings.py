@@ -53,13 +53,13 @@ INSTALLED_APPS = [
     'drf_yasg',
     'accounts',
     'AiChat',
-    'recipe',
     'adminapi',
     'workout',
     'termsandpolicy',
     'subscription',
     'meal',
-    'workoutplan'
+    'workoutplan',
+    'recipe'
 ]
 
 MIDDLEWARE = [
@@ -72,7 +72,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.locale.LocaleMiddleware',
-    'utils.middleware.LanguageMiddleware',
 ]
 
 

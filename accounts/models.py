@@ -57,6 +57,144 @@ class Profile(models.Model):
 
 
 
+class ProfileSpanish(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile_spanish')
+    image = models.ImageField(upload_to='media/user_images/', null=True, blank=True)
+    fullname = models.CharField(max_length=200, null=True, blank=True, verbose_name="Nombre completo")
+    gender = models.CharField(max_length=15, choices=(
+        ('Masculino','Masculino'),
+        ('Femenino','Femenino'),
+    ), null=True, blank=True, verbose_name="Género")
+    date_of_birth = models.DateField(null=True, blank=True, verbose_name="Fecha de nacimiento")
+
+    weight = models.FloatField(null=True, blank=True, verbose_name="Peso")
+    height = models.FloatField(null=True, blank=True, verbose_name="Altura")
+    abdominal = models.FloatField(null=True, blank=True, verbose_name="Abdominales")
+    sacroiliac = models.FloatField(null=True, blank=True, verbose_name="Sacroilíaco")
+    subscapularis = models.FloatField(null=True, blank=True, verbose_name="Subescapular")
+    triceps = models.FloatField(null=True, blank=True, verbose_name="Tríceps")
+
+    fitness_level = models.CharField(max_length=20, choices=(
+        ('Principiante', 'Principiante'),
+        ('Básico', 'Básico'),
+        ('Intermedio', 'Intermedio'),
+        ('Avanzado', 'Avanzado'),
+    ), null=True, blank=True, verbose_name="Nivel de forma física")
+
+    trainer = models.CharField(max_length=30, choices=(
+        ('En casa', 'En casa'),
+        ('En el gimnasio', 'En el gimnasio'),
+        ('Artes marciales', 'Artes marciales'),
+        ('Correr', 'Correr'),
+        ('Otros deportes', 'Otros deportes'),
+    ), null=True, blank=True, verbose_name="Entrenador")
+
+    at_home = MultiSelectField(choices=(
+        ('Mancuernas', 'Mancuernas'),
+        ('Bandas de resistencia', 'Bandas de resistencia'),
+        ('Barra de dominadas', 'Barra de dominadas'),
+        ('Banco', 'Banco'),
+        ('Sin equipo', 'Sin equipo'),
+    ), max_length=100, null=True, blank=True, verbose_name="Equipo en casa")
+
+    at_gym = MultiSelectField(choices=(
+        ('Barra', 'Barra'),
+        ('Rack de sentadillas', 'Rack de sentadillas'),
+        ('Máquina de cables', 'Máquina de cables'),
+        ('Máquina Smith', 'Máquina Smith'),
+    ), max_length=100, null=True, blank=True, verbose_name="Equipo en el gimnasio")
+
+    martial_arts = MultiSelectField(choices=(
+        ('Correr', 'Correr'),
+        ('Fútbol', 'Fútbol'),
+        ('Natación', 'Natación'),
+    ), max_length=100, null=True, blank=True, verbose_name="Artes marciales")
+
+    running = MultiSelectField(choices=(
+        ('Correr', 'Correr'),
+        ('Fútbol', 'Fútbol'),
+        ('Natación', 'Natación'),
+    ), max_length=100, null=True, blank=True, verbose_name="Correr")
+
+    other_sports = MultiSelectField(choices=(
+        ('Correr', 'Correr'),
+        ('Fútbol', 'Fútbol'),
+        ('Natación', 'Natación'),
+    ), max_length=100, null=True, blank=True, verbose_name="Otros deportes")
+
+    train_duration = models.CharField(max_length=100, null=True, blank=True, verbose_name="Duración del entrenamiento")
+
+    interested_workout = models.CharField(max_length=50, choices=(
+        ('Perder grasa', 'Perder grasa'),
+        ('Ganar músculo', 'Ganar músculo'),
+        ('Mantenimiento', 'Mantenimiento'),
+    ), null=True, blank=True, verbose_name="Objetivo del entrenamiento")
+
+    injuries_discomfort = models.TextField(null=True, blank=True, verbose_name="Lesiones o molestias")
+
+    routine_duration = models.CharField(max_length=20, choices=(
+        ('1 Mes', '1 Mes'),
+        ('2 Meses', '2 Meses'),
+        ('3 Meses', '3 Meses'),
+        ('6 Meses', '6 Meses'),
+        ('1 Año', '1 Año'),
+    ), null=True, blank=True, verbose_name="Duración de la rutina")
+
+    dietary_preferences = models.CharField(max_length=30, choices=(
+        ('Keto', 'Keto'),
+        ('Paleo', 'Paleo'),
+        ('Vegetariano', 'Vegetariano'),
+        ('Vegano', 'Vegano'),
+        ('Sin gluten', 'Sin gluten'),
+        ('Sin preferencias', 'Sin preferencias'),
+    ), null=True, blank=True, verbose_name="Preferencias dietéticas")
+
+    allergies = MultiSelectField(choices=(
+        ('Nueces', 'Nueces'),
+        ('Lácteos', 'Lácteos'),
+        ('Mariscos', 'Mariscos'),
+        ('Huevos', 'Huevos'),
+        ('Sin alergias', 'Sin alergias'),
+    ), max_length=100, null=True, blank=True, verbose_name="Alergias")
+
+    food_preference = MultiSelectField(choices=(
+        ('Huevo', 'Huevo'),
+        ('Leche', 'Leche'),
+        ('Pescado', 'Pescado'),
+    ), max_length=100, null=True, blank=True, verbose_name="Preferencias alimenticias")
+
+    medical_conditions = MultiSelectField(choices=(
+        ('Diabetes', 'Diabetes'),
+        ('Presión arterial alta', 'Presión arterial alta'),
+        ('Enfermedad cardíaca', 'Enfermedad cardíaca'),
+    ), max_length=100, null=True, blank=True, verbose_name="Condiciones médicas")
+
+    fitness_goals = MultiSelectField(choices=(
+        ('Pérdida de peso', 'Pérdida de peso'),
+        ('Aumento de peso', 'Aumento de peso'),
+        ('Mantenimiento', 'Mantenimiento'),
+    ), max_length=100, null=True, blank=True, verbose_name="Objetivos de fitness")
+
+    lifestyle_habits = models.CharField(max_length=20, choices=(
+        ('3 comidas', '3 comidas'),
+        ('4 comidas', '4 comidas'),
+        ('5 comidas', '5 comidas'),
+        ('6 comidas', '6 comidas'),
+        ('7 comidas', '7 comidas'),
+        ('8 comidas', '8 comidas'),
+    ), null=True, blank=True, verbose_name="Hábitos alimenticios")
+
+    def __str__(self):
+        return self.fullname if self.fullname else str(self.user)
+
+
+
+
+
+    
+
+
+
 
 class PasswordResetOTP(models.Model):
     user = models.ForeignKey(User , on_delete=models.CASCADE)
