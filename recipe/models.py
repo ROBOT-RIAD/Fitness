@@ -1,6 +1,6 @@
 from django.db import models
 
-
+ 
 class Recipe(models.Model):
     unique_id = models.CharField(max_length=100, unique=True,null=True, blank=True,help_text="same RecipeSpanish data")
     image = models.ImageField(upload_to='media/recipes/', null=True, blank=True)

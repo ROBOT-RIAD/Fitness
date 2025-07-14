@@ -6,9 +6,12 @@ from recipe.models import Recipe
 
 class MealPlan(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='meal_plans')
+    meal_plan_name = models.CharField(max_length=255)
+    tags = models.CharField(max_length=255, blank=True, help_text="Comma-separated tags for the meal plan")
     start_date = models.DateField()
     end_date = models.DateField()
     is_completed = models.BooleanField(default=False)
+    is_cancelled = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -38,9 +41,8 @@ class DailyMeal(models.Model):
 class MealEntry(models.Model):
     daily_meal = models.ForeignKey(DailyMeal, on_delete=models.CASCADE, related_name='meals')
     meal_type = models.CharField(max_length=50)  # Just a plain string now
-    recipe = models.ForeignKey(Recipe, on_delete=models.SET_NULL, null=True, blank=True)
+    recipe = models.ForeignKey(Recipe,to_field='unique_id',on_delete=models.SET_NULL,null=True,blank=True)
     completed = models.BooleanField(default=False)
-    
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
