@@ -59,7 +59,8 @@ INSTALLED_APPS = [
     'subscription',
     'meal',
     'workoutplan',
-    'recipe'
+    'recipe',
+    'userapi'
 ]
 
 MIDDLEWARE = [

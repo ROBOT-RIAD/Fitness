@@ -41,6 +41,7 @@ urlpatterns = [
     path('', include('accounts.urls')),
     path('chat/', include('AiChat.urls')),
     path('adminapi/', include('adminapi.urls')),
+    path('userapi/', include('userapi.urls')),
     path('subscription/', include('subscription.urls')),
 
 
