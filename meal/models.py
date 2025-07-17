@@ -13,6 +13,7 @@ class MealPlan(models.Model):
     is_completed = models.BooleanField(default=False)
     is_cancelled = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.user.email}'s plan from {self.start_date}"

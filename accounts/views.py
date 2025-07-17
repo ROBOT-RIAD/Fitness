@@ -620,3 +620,7 @@ class ResetPasswordView(APIView):
             return Response({"message": "Password has been reset successfully."}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error" : e}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+
+
+        

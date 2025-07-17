@@ -7,6 +7,7 @@ from datetime import date, timedelta
 from .models import MealPlan, DailyMeal, MealEntry
 from recipe.models import Recipe
 from accounts.models import Profile
+from accounts.permissions import IsUserRole
 from .services import build_meal_plan
 
 from drf_yasg.utils import swagger_auto_schema
@@ -14,7 +15,7 @@ from drf_yasg import openapi
 
 
 class GenerateMealPlanView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated,IsUserRole]
 
     @swagger_auto_schema(
         operation_summary="Generate a 15-Day AI-Powered Meal Plan",
@@ -97,3 +98,5 @@ class GenerateMealPlanView(APIView):
             "meal_plan_name": meal_plan_name,
             "tags": tags
         }, status=status.HTTP_201_CREATED)
+
+
