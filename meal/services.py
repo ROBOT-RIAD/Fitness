@@ -59,12 +59,13 @@ def build_meal_plan(profile, recipes_qs, days=15):
         "Post-Dinner",
         "Late Snack"
     ]
+    meal_count = MEAL_COUNT_BY_LIFESTYLE.get(readable_lifestyle, 3)
     selected_meals = meal_types[:meal_count]
 
     # Build the JSON example for prompt (with placeholders)
     meal_json = ",\n        ".join([
-        f'{{"meal_type": "{meal}", "recipe_uid": "abc123"}}' for meal in selected_meals
-    ])
+    f'{{"meal_type": "{meal}", "recipe_uid": "abc123", "eating_time": "08:00"}}' for meal in selected_meals
+])
 
     start_date = date.today()
     date_list = [(start_date + timedelta(days=i)).isoformat() for i in range(days)]
@@ -79,6 +80,12 @@ Use these exact {days} dates for the meal plan:
 {json.dumps(date_list, indent=2)}
 
 Generate a {days}-day meal plan using the provided recipes and user profile.
+
+⚠️ IMPORTANT:
+- Each day MUST include **Breakfast**, **Lunch**, and **Dinner**.
+- You may add optional meals like snacks based on the user's lifestyle.
+- Do NOT return any day that skips any of those three meals.
+- ✅ Each meal entry MUST also include an `eating_time` in 24-hour format (HH:MM), appropriate to the meal type.
 
 ✅ Output format (MUST be valid JSON):
 {{

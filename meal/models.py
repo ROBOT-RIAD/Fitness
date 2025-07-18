@@ -44,7 +44,10 @@ class MealEntry(models.Model):
     meal_type = models.CharField(max_length=50)  # Just a plain string now
     recipe = models.ForeignKey(Recipe,to_field='unique_id',on_delete=models.SET_NULL,null=True,blank=True)
     completed = models.BooleanField(default=False)
+    cancelled = models.BooleanField(default=False) 
 
+    eating_time = models.TimeField(null=True, blank=True)
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

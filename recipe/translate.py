@@ -14,7 +14,6 @@ def translate_to_english(data):
     JSON to translate:
     {json.dumps(data, indent=2)}
 
-
     Return raw JSON with translated values and same keys.
     """
     try:
