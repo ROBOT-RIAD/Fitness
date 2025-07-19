@@ -12,10 +12,14 @@ class WorkoutPlanAdmin(admin.ModelAdmin):
 
 @admin.register(DailyWorkout)
 class DailyWorkoutAdmin(admin.ModelAdmin):
-    list_display = ('id', 'workout_plan', 'date', 'title', 'completed')
+    list_display = ('id', 'workout_plan', 'date', 'title', 'title_spanish', 'completed')
     list_filter = ('completed', 'date')
-    search_fields = ('title', 'tags', 'workout_plan__workout_plan_name')
+    search_fields = ('title', 'title_spanish', 'tags', 'tags_spanish', 'workout_plan__workout_plan_name')
 
+    # Optional: display user email from workout_plan relation
+    def user_email(self, obj):
+        return obj.workout_plan.user.email
+    user_email.short_description = 'User Email'
 
 @admin.register(WorkoutEntry)
 class WorkoutEntryAdmin(admin.ModelAdmin):

@@ -92,7 +92,9 @@ class GenerateWorkoutPlanView(APIView):
                 workout_plan=workout_plan,
                 date=day["date"],
                 title=day.get("title", f"Workout - {day['date']}"),
+                title_spanish=day.get("title_spanish", day.get("title", "")),
                 tags=day.get("tags", tags),
+                tags_spanish=day.get("tags_spanish", day.get("tags", "")),
             )
             for w in day.get("workouts", []):
                 workout = uid_cache.get(w["workout_uid"])

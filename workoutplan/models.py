@@ -26,22 +26,17 @@ class WorkoutPlan(models.Model):
             self.save()
     
 
-
-
-
-
 class DailyWorkout(models.Model):
     workout_plan = models.ForeignKey(WorkoutPlan, on_delete=models.CASCADE, related_name='daily_workouts')
     date = models.DateField()
     title = models.CharField(max_length=255, help_text="Title for the daily workout")
+    title_spanish = models.CharField(max_length=255, blank=True, help_text="Título del entrenamiento diario en español")
     tags = models.CharField(max_length=255, blank=True, help_text="Comma-separated tags")
+    tags_spanish = models.CharField(max_length=255, blank=True, help_text="Etiquetas separadas por comas en español")
     completed = models.BooleanField(default=False, help_text="Mark if the workout is completed")
 
     def __str__(self):
         return f"{self.title} on {self.date} for {self.workout_plan.user.email}"
-
-
-
 
 
 class WorkoutEntry(models.Model):

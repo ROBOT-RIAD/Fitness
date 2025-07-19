@@ -68,13 +68,18 @@ Use these exact {days} dates for the workout plan:
 
 Generate a {days}-day workout plan in JSON format. Each day should include:
 
+Generate a {days}-day workout plan in JSON format. Each day should include:
+
 - "date"
-- "title": a short workout title (e.g., "Upper Body Strength")
-- "tags": comma-separated tags (e.g., "arms, strength")
+- "title": short workout title in English (e.g., "Upper Body Strength")
+- "title_spanish": Spanish translation of the title
+- "tags": comma-separated tags in English (e.g., "arms, strength")
+- "tags_spanish": comma-separated Spanish translation (e.g., "brazos, fuerza")
 - "workouts": list of 3–6 workouts (from the provided list), each with:
     - workout_uid
     - set_of
     - reps
+
 
 ✅ Format (return as JSON):
 {{
