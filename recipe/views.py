@@ -13,6 +13,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from django.conf import settings
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.views import APIView
 # Create your views here.
 from .translate import translate_to_english,translate_to_spanish
 
@@ -336,5 +337,70 @@ class RecipeSpanishAdminViewSet(ModelViewSet):
         recipe_spanish = self.get_object()
         recipe_spanish.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+
+
+class SingleRecipeDetailAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_summary="Get full details of a single Recipe by unique_id",
+        operation_description="Returns full recipe details by unique_id (not ID)",
+        manual_parameters=[
+            openapi.Parameter(
+                'unique_id',
+                openapi.IN_PATH,
+                description="Unique ID of the Recipe",
+                 type=openapi.TYPE_STRING,
+                required=True
+            )
+        ],
+        tags=['User get single Recipe'],
+        responses={
+            200: openapi.Response("Recipe details", RecipeSerializer),
+            404: "Recipe not found"
+        }
+    )
+    def get(self, request, unique_id):
+        try:
+            recipe = Recipe.objects.get(unique_id=unique_id)
+        except Recipe.DoesNotExist:
+            return Response({"detail": "Recipe not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = RecipeSerializer(recipe)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+
+
+class SpanishSingleRecipeDetailAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_summary="Get full details of a single Recipe by unique_id",
+        operation_description="Returns full recipe details by unique_id (not ID)",
+        manual_parameters=[
+            openapi.Parameter(
+                'unique_id',
+                openapi.IN_PATH,
+                description="Unique ID of the Recipe",
+                 type=openapi.TYPE_STRING,
+                required=True
+            )
+        ],
+        tags=['User get single Recipe'],
+        responses={
+            200: openapi.Response("Recipe details", RecipeSpanishSerializer),
+            404: "Recipe not found"
+        }
+    )
+    def get(self, request, unique_id):
+        try:
+            recipe = RecipeSpanish.objects.get(unique_id=unique_id)
+        except Recipe.DoesNotExist:
+            return Response({"detail": "Recipe not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = RecipeSpanishSerializer(recipe)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 

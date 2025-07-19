@@ -11,9 +11,10 @@ from accounts.permissions import IsUserRole
 from .services import build_meal_plan
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from datetime import time
+from datetime import time,date
 import datetime
-from django.db.models import Sum
+from django.db.models import Sum,Q
+from rest_framework.parsers import JSONParser
 
 
 MEAL_TYPE_TRANSLATIONS = {
@@ -383,4 +384,251 @@ class SpanishDailyMealDetailAPIView(APIView):
             },
             "meals": data,
         }, status=status.HTTP_200_OK)
+
+
+
+
+class TodaysMealAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_summary="Get today's meals",
+        operation_description="Returns all meal entries for the authenticated user's meal plan for today, along with 15-day summary of calories, protein, and fat.",
+        tags=['User Get Today Meals'],
+        responses={
+            200: openapi.Response("List of meal entries and 15-day summary", MealEntryWithFullRecipeSerializer(many=True)),
+            404: "No meals found for today"
+        }
+    )
+    def get(self, request):
+        user = request.user
+        today = date.today()
+
+        # Fetch today’s daily meals
+        daily_meals_today = DailyMeal.objects.filter(
+            meal_plan__user=user,
+            date=today
+        )
+
+        if not daily_meals_today.exists():
+            return Response({"detail": "No meals found for today."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Fetch today's entries
+        today_meal_entries = MealEntry.objects.filter(
+            daily_meal__in=daily_meals_today
+        ).order_by('created_at')
+
+        # 15-day range
+        start_date = today - timedelta(days=14)
+        end_date = today
+
+        # All meals in last 15 days
+        daily_meals_15_days = DailyMeal.objects.filter(
+            meal_plan__user=user,
+            date__range=(start_date, end_date)
+        )
+
+        # Meals in range
+        meal_entries_15_days = MealEntry.objects.filter(
+            daily_meal__in=daily_meals_15_days
+        )
+
+        # Total values
+        total_nutrients = meal_entries_15_days.aggregate(
+            total_calories=Sum('recipe__calories'),
+            total_protein=Sum('recipe__protein'),
+            total_fat=Sum('recipe__fat'),
+        )
+
+        # Completed values
+        completed_nutrients = meal_entries_15_days.filter(completed=True).aggregate(
+            completed_calories=Sum('recipe__calories'),
+            completed_protein=Sum('recipe__protein'),
+            completed_fat=Sum('recipe__fat'),
+        )
+
+        # Fallback if null
+        def safe(val): return float(val) if val is not None else 0.0
+
+        serializer = MealEntryWithFullRecipeSerializer(today_meal_entries, many=True)
+        return Response({
+            "today_meals": serializer.data,
+            "stats": {
+                "15_day_totals": {
+                    "calories": safe(total_nutrients["total_calories"]),
+                    "protein": safe(total_nutrients["total_protein"]),
+                    "fat": safe(total_nutrients["total_fat"]),
+                },
+                "15_day_completed": {
+                    "calories": safe(completed_nutrients["completed_calories"]),
+                    "protein": safe(completed_nutrients["completed_protein"]),
+                    "fat": safe(completed_nutrients["completed_fat"]),
+                }
+            }
+        }, status=status.HTTP_200_OK)
+    
+
+class SpanishTodaysMealAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_summary="Get today's meals (Spanish)",
+        operation_description="Returns all meal entries for the authenticated user's meal plan for today, in Spanish.",
+        tags=['User Get Today Meals'],
+        responses={
+            200: openapi.Response("List of meal entries", MealEntryWithFullRecipeSpanishSerializer(many=True)),
+            404: "No meals found for today"
+        }
+    )
+    def get(self, request):
+        user = request.user
+        today = date.today()
+
+        # Get today's daily meals
+        daily_meals_today = DailyMeal.objects.filter(
+            meal_plan__user=user,
+            date=today
+        )
+
+        if not daily_meals_today.exists():
+            return Response({"detail": "No meals found for today."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Get today's meal entries
+        today_meal_entries = MealEntry.objects.filter(
+            daily_meal__in=daily_meals_today
+        ).order_by('created_at')
+
+        # Get 15-day range
+        start_date = today - timedelta(days=14)
+        end_date = today
+
+        # Get all meal entries in that range
+        daily_meals_15_days = DailyMeal.objects.filter(
+            meal_plan__user=user,
+            date__range=(start_date, end_date)
+        )
+
+        meal_entries_15_days = MealEntry.objects.filter(
+            daily_meal__in=daily_meals_15_days
+        )
+
+        # Aggregate totals
+        total_nutrients = meal_entries_15_days.aggregate(
+            total_calories=Sum('recipe__calories'),
+            total_protein=Sum('recipe__protein'),
+            total_fat=Sum('recipe__fat'),
+        )
+
+        completed_nutrients = meal_entries_15_days.filter(completed=True).aggregate(
+            completed_calories=Sum('recipe__calories'),
+            completed_protein=Sum('recipe__protein'),
+            completed_fat=Sum('recipe__fat'),
+        )
+
+        def safe(val): return float(val) if val is not None else 0.0
+
+        # Serialize today's entries
+        serializer = MealEntryWithFullRecipeSpanishSerializer(today_meal_entries, many=True)
+        data = serializer.data
+
+        # Predefined meal_type translation
+        MEAL_TYPE_TRANSLATIONS = {
+            "Breakfast": "Desayuno",
+            "Snack 1": "Merienda 1",
+            "Lunch": "Almuerzo",
+            "Snack 2": "Merienda 2",
+            "Dinner": "Cena",
+            "Snack 3": "Merienda 3",
+            "Post-Dinner": "Después de la cena",
+            "Late Snack": "Merienda nocturna"
+        }
+
+        # Translate meal_type values manually
+        for meal in data:
+            meal_type_en = meal.get('meal_type')
+            meal['meal_type'] = MEAL_TYPE_TRANSLATIONS.get(meal_type_en, meal_type_en)
+
+        return Response({
+            "today_meals": data,
+            "stats": {
+                "15_day_totals": {
+                    "calories": safe(total_nutrients["total_calories"]),
+                    "protein": safe(total_nutrients["total_protein"]),
+                    "fat": safe(total_nutrients["total_fat"]),
+                },
+                "15_day_completed": {
+                    "calories": safe(completed_nutrients["completed_calories"]),
+                    "protein": safe(completed_nutrients["completed_protein"]),
+                    "fat": safe(completed_nutrients["completed_fat"]),
+                }
+            }
+        }, status=status.HTTP_200_OK)
+
+
+class UpdateMealCompletionStatusAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    parser_classes = [JSONParser]
+
+    @swagger_auto_schema(
+        operation_summary="Update today's meal entry completion status",
+        operation_description="Allows the user to update the 'completed' status of a meal entry only if it's for today.",
+        manual_parameters=[
+            openapi.Parameter(
+                'pk',
+                openapi.IN_PATH,
+                description="ID of the MealEntry",
+                type=openapi.TYPE_INTEGER,
+                required=True
+            )
+        ],
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=["completed"],
+            properties={
+                "completed": openapi.Schema(
+                    type=openapi.TYPE_BOOLEAN,
+                    description="True to mark meal as completed, False otherwise"
+                )
+            }
+        ),
+        tags=['User Get Today Meals'],
+        responses={
+            200: openapi.Response(description="Success", examples={
+                "application/json": {
+                    "id": 5,
+                    "completed": True,
+                    "message": "Meal completion status updated successfully."
+                }
+            }),
+            400: "Missing 'completed' field or not a meal for today",
+            404: "Meal entry not found"
+        }
+    )
+    def patch(self, request, pk):
+        try:
+            meal_entry = MealEntry.objects.select_related('daily_meal').get(
+                pk=pk,
+                daily_meal__meal_plan__user=request.user
+            )
+        except MealEntry.DoesNotExist:
+            return Response({"detail": "Meal entry not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Check if it's today's meal
+        if meal_entry.daily_meal.date != date.today():
+            return Response({"detail": "Can only update meals for today."}, status=status.HTTP_400_BAD_REQUEST)
+
+        completed = request.data.get("completed")
+        if completed is None:
+            return Response({"detail": "Missing 'completed' field."}, status=status.HTTP_400_BAD_REQUEST)
+
+        meal_entry.completed = bool(completed)
+        meal_entry.save()
+        return Response({
+            "id": meal_entry.id,
+            "completed": meal_entry.completed,
+            "message": "Meal completion status updated successfully."
+        }, status=status.HTTP_200_OK)  
+
+
+
 
