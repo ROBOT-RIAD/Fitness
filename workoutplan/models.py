@@ -48,4 +48,20 @@ class WorkoutEntry(models.Model):
 
     def __str__(self):
         workout_name = self.workout.workout_name if self.workout else "Unknown Workout"
-        return f"{workout_name} on {self.daily_workout.date} - Sets: {self.set_of} - Completed: {self.completed}"   
+        return f"{workout_name} on {self.daily_workout.date} - Sets: {self.set_of} - Completed: {self.completed}" 
+
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        all_completed = self.daily_workout.workouts.filter(completed=False).count() == 0
+        if all_completed and not self.daily_workout.completed:
+            self.daily_workout.completed = True
+            self.daily_workout.save()
+        elif not all_completed and self.daily_workout.completed:
+            self.daily_workout.completed = False
+            self.daily_workout.save()
+
+
+
+  

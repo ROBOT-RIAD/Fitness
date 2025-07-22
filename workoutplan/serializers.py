@@ -1,5 +1,6 @@
 from rest_framework import serializers
-
+from workout.models import  Workout
+from .models import WorkoutEntry
 
 class DelimitedListField(serializers.Field):
     """
@@ -55,3 +56,25 @@ class TrainingDataSerializer(serializers.Serializer):
     calves       = DelimitedListField(required=False)
     adductors    = DelimitedListField(required=False)  
     lower_back   = DelimitedListField(required=False)
+
+
+
+
+class WorkoutSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Workout
+        fields = ['workout_name', 'time_needed', 'for_body_part', 'workout_type', 'calories_burn', 'equipment_needed', 'tag', 'image', 'benefits','unique_id']
+
+class WorkoutEntrySerializer(serializers.ModelSerializer):
+    workout = WorkoutSerializer()
+
+    class Meta:
+        model = WorkoutEntry
+        fields = ['set_of', 'reps', 'completed', 'workout']
+
+
+
+class WorkoutEntryUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WorkoutEntry
+        fields = ['id', 'completed']

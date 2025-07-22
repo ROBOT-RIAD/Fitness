@@ -11,7 +11,7 @@ from rest_framework.decorators import action
 from rest_framework.views import APIView
 from django.core.mail import send_mail
 from django.conf import settings
-
+from AiChat.models import HealthProfile
 #$swagger
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
@@ -127,8 +127,10 @@ CHOICE_MAPPINGS = {
     },
 }
 
-# Create your views here.
 
+
+
+# Create your views here.
 
 class RegisterApiView(CreateAPIView):
     queryset = User.objects.all()
@@ -160,8 +162,6 @@ class RegisterApiView(CreateAPIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-
-
 class LoginAPIView(TokenObtainPairView):
     permission_classes = [AllowAny]
     serializer_class = CustomTokenObtainPairSerializer
@@ -174,8 +174,6 @@ class LoginAPIView(TokenObtainPairView):
         except Exception as e :
             return Response({"error": str(e)}, status= status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
-
 class CustomTokenRefreshView(TokenRefreshView):
     permission_classes = [AllowAny]
 
@@ -185,7 +183,6 @@ class CustomTokenRefreshView(TokenRefreshView):
             return super().post(request, *args, **kwargs)
         except Exception as e :
             return Response({"error":str(e)} , status= status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 
 class ProfileViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
@@ -478,12 +475,23 @@ class ProfileViewSet(viewsets.ViewSet):
             )
             content = response.choices[0].message.content.strip()
             recommended_data = json.loads(content)
+            # Create or update the user's HealthProfile
+            health_profile, created = HealthProfile.objects.update_or_create(
+                user=request.user,
+                defaults={
+                    "perfect_weight_kg": recommended_data["perfect_weight_kg"],
+                    "abdominal": recommended_data["abdominal"],
+                    "triceps": recommended_data["triceps"],
+                    "subscapular": recommended_data["subscapular"],
+                    "suprailiac": recommended_data["suprailiac"],  # From sacroiliac
+                    "total_calories_per_day": recommended_data["total_calories_per_day"],
+                    "water_need_liters_per_day": recommended_data["water_need_liters_per_day"],
+                    "sleep_need_hours_per_day": recommended_data["sleep_need_hours_per_day"],
+                }
+            )
             return Response(recommended_data, status=200)
         except Exception as e:
             return Response({"error": "OpenAI failed", "detail": str(e)}, status=500)
-
-
-
 
 class SendOTPView(APIView):
     permission_classes = [AllowAny]
@@ -527,13 +535,6 @@ class SendOTPView(APIView):
         except Exception as e:
             return Response({"error": "Failed to send OTP."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
-
-
-
-
-
-
 class VerifyOTPView(APIView):
     permission_classes = [AllowAny]
 
@@ -568,12 +569,6 @@ class VerifyOTPView(APIView):
 
         return Response({"message": "OTP verified successfully."}, status=status.HTTP_200_OK)
     
-
-
-
-
-
-
 class ResetPasswordView(APIView):
     permission_classes = [AllowAny] 
 

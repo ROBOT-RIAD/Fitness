@@ -12,6 +12,8 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from django.conf import settings
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
 # Create your views here.
 
 from recipe.translate import translate_to_english,translate_to_spanish
@@ -37,10 +39,6 @@ def ensure_unique_id(data: dict) -> str:
     if not data.get("unique_id"):
         data["unique_id"] = str(uuid.uuid4())
     return data["unique_id"]
-
-
-
-
 
 class WorkoutAdminViewSet(ModelViewSet):
     queryset = Workout.objects.all()
@@ -161,7 +159,6 @@ class WorkoutAdminViewSet(ModelViewSet):
         workout.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-
 class WorkoutSpanishAdminViewSet(ModelViewSet):
     queryset = WorkoutSpanish.objects.all()
     serializer_class = WorkoutSpanishSerializer
@@ -279,3 +276,55 @@ class WorkoutSpanishAdminViewSet(ModelViewSet):
         workout_spanish = self.get_object()
         workout_spanish.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+
+
+class GetEnglishWorkoutByUniqueIdView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_summary="Get English workout by unique_id",
+        manual_parameters=[
+            openapi.Parameter('unique_id', openapi.IN_PATH, description="Unique ID of the workout", type=openapi.TYPE_STRING)
+        ],
+        responses={
+            200: openapi.Response("Success", WorkoutSerializer),
+            404: "Workout not found"
+        },
+        tags=["User get single workout"]
+    )
+
+    def get(self, request, unique_id):
+        workout = Workout.objects.filter(unique_id=unique_id).first()
+        if not workout:
+            return Response({"detail": "Workout not found."}, status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = WorkoutSerializer(workout)
+        return Response(serializer.data, status=200)
+    
+
+class GetSpanishWorkoutByUniqueIdView(APIView):
+    permission_classes = [IsAuthenticated]
+    @swagger_auto_schema(
+        operation_summary="Get Spanish workout by unique_id",
+        manual_parameters=[
+            openapi.Parameter('unique_id', openapi.IN_PATH, description="Unique ID of the workout", type=openapi.TYPE_STRING)
+        ],
+        responses={
+            200: openapi.Response("Success", WorkoutSpanishSerializer),
+            404: "Spanish workout not found"
+        },
+        tags=["User get single workout"]
+    )
+    def get(self, request, unique_id):
+        workout = WorkoutSpanish.objects.filter(unique_id=unique_id).first()
+        if not workout:
+            return Response({"detail": "Spanish workout not found."}, status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = WorkoutSpanishSerializer(workout)
+        return Response(serializer.data, status=200)
+
+
+
+
+
