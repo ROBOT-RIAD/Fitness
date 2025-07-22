@@ -60,7 +60,8 @@ INSTALLED_APPS = [
     'meal',
     'workoutplan',
     'recipe',
-    'userapi'
+    'userapi',
+    'home'
 ]
 
 MIDDLEWARE = [

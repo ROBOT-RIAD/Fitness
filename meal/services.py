@@ -51,6 +51,7 @@ def build_meal_plan(profile, recipes_qs, days=15):
     # Define meal types up to 8 meals/day
     meal_types = [
         "Breakfast",
+        "Snack"
         "Snack 1",
         "Lunch",
         "Snack 2",
@@ -59,6 +60,7 @@ def build_meal_plan(profile, recipes_qs, days=15):
         "Post-Dinner",
         "Late Snack"
     ]
+    
     meal_count = MEAL_COUNT_BY_LIFESTYLE.get(readable_lifestyle, 3)
     selected_meals = meal_types[:meal_count]
 

@@ -181,8 +181,6 @@ class DaywiseMealInfoAPIView(APIView):
     
 
 
-
-
 class SpanishDaywiseMealInfoAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -384,8 +382,6 @@ class SpanishDailyMealDetailAPIView(APIView):
             },
             "meals": data,
         }, status=status.HTTP_200_OK)
-
-
 
 
 class TodaysMealAPIView(APIView):

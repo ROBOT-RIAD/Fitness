@@ -65,3 +65,7 @@ class UserSpanishFullInfoAPIView(APIView):
 
         translated_data = translate_to_spanish(data)
         return Response(translated_data)
+
+
+
+

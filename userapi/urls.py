@@ -5,7 +5,7 @@ from .views import UserFullInfoAPIView,UserSpanishFullInfoAPIView
 from meal.views import DaywiseMealInfoAPIView,SpanishDaywiseMealInfoAPIView,DailyMealDetailAPIView,SpanishDailyMealDetailAPIView,TodaysMealAPIView,SpanishTodaysMealAPIView,UpdateMealCompletionStatusAPIView
 from recipe.views import SingleRecipeDetailAPIView,SpanishSingleRecipeDetailAPIView
 from workout.views import GetEnglishWorkoutByUniqueIdView, GetSpanishWorkoutByUniqueIdView
-
+from home.views import TodayDailyDetailsAPIView
 urlpatterns = [
     path("meal-plans/generate/", GenerateMealPlanView.as_view(), name="generate-meal-plan"),
     path("workout-plans/generate/", GenerateWorkoutPlanView.as_view(), name="generate-meal-plan"),
@@ -29,5 +29,6 @@ urlpatterns = [
     path('workouts/today/', TodayWorkoutView.as_view(), name='today-workouts'),
     path('spanish-workouts/today/', SpanishWorkoutEntryListView.as_view(), name='spanish-today-workouts'),
     path('workout/update-today-entry/<int:pk>/',UpdateTodayWorkoutEntryAPIView.as_view(),name='update-today-workout-entry'),
+    path('plans/today/', TodayDailyDetailsAPIView.as_view(), name='today-plans'),
 ]
 

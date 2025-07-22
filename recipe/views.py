@@ -162,19 +162,25 @@ class RecipeAdminViewSet(ModelViewSet):
             }
 
 
-            spanish_recipe = recipe.related_recipe
-            if spanish_recipe:
+            # spanish_recipe = recipe.related_recipe
+            # if spanish_recipe:
+            #     spanish_serializer = RecipeSpanishSerializer(spanish_recipe, data=spanish_data, partial=False)
+            #     spanish_serializer.is_valid(raise_exception=True)
+            #     spanish_serializer.save()
+            # else:
+            #     spanish_serializer = RecipeSpanishSerializer(data=spanish_data)
+            #     spanish_serializer.is_valid(raise_exception=True)
+            #     spanish_recipe = spanish_serializer.save()
+            #     updated_recipe.related_recipe = spanish_recipe
+            #     updated_recipe.save()
+            try:
+                spanish_recipe = RecipeSpanish.objects.get(unique_id=updated_recipe.unique_id)
                 spanish_serializer = RecipeSpanishSerializer(spanish_recipe, data=spanish_data, partial=False)
-                spanish_serializer.is_valid(raise_exception=True)
-                spanish_serializer.save()
-            else:
+            except RecipeSpanish.DoesNotExist:
                 spanish_serializer = RecipeSpanishSerializer(data=spanish_data)
-                spanish_serializer.is_valid(raise_exception=True)
-                spanish_recipe = spanish_serializer.save()
-                updated_recipe.related_recipe = spanish_recipe
-                updated_recipe.save()
-
-
+            
+            spanish_serializer.is_valid(raise_exception=True)
+            spanish_serializer.save()
             return Response(serializer.data)
         except Exception as e:
             return Response({"error": f"Failed to update translated recipe: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
@@ -337,8 +343,6 @@ class RecipeSpanishAdminViewSet(ModelViewSet):
         recipe_spanish = self.get_object()
         recipe_spanish.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
 
 
 class SingleRecipeDetailAPIView(APIView):
