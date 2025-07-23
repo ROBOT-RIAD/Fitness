@@ -29,3 +29,26 @@ class IsAdminOrUser(BasePermission):
     """
     def has_permission(self, request, view):
         return request.user.is_authenticated and getattr(request.user, 'role', None) in ['admin', 'user']
+
+
+class IsSelfOrAdminDeletingUser(BasePermission):
+    """
+    - Allows normal users to delete their own account.
+    - Allows admin to delete other users' accounts.
+    - Admin cannot delete their own account.
+    """
+
+    def has_object_permission(self, request, view, obj):
+        # Must be authenticated and role must be admin or user
+        if not request.user.is_authenticated or request.user.role not in ['admin', 'user']:
+            return False
+
+        # If user is deleting themselves
+        if request.user == obj:
+            return request.user.role == 'user'  # Only normal users can self-delete
+
+        # If admin deleting someone else
+        if request.user.role == 'admin':
+            return True  # But admin cannot delete self (already excluded above)
+
+        return False

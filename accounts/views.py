@@ -3,7 +3,7 @@ from rest_framework import generics,viewsets,status
 from rest_framework.generics import CreateAPIView
 from .models import User,Profile,PasswordResetOTP
 from .models import Profile,ProfileSpanish
-from .serializers import RegisterSerializer,CustomTokenObtainPairSerializer,ProfileSerializer,SendOTPSerializer,VerifyOTPSerializer,ResetPasswordSerializer,ProfileSpanishSerializer
+from .serializers import RegisterSerializer,CustomTokenObtainPairSerializer,ProfileSerializer,SendOTPSerializer,VerifyOTPSerializer,ResetPasswordSerializer,ProfileSpanishSerializer,UserSerializer
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework import status
@@ -16,13 +16,13 @@ from AiChat.models import HealthProfile
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework.parsers import MultiPartParser, FormParser,JSONParser
-
+from rest_framework.generics import DestroyAPIView
 
 #jwt
 from rest_framework.permissions import AllowAny,IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView,TokenRefreshView
-
+from .permissions import IsSelfOrAdminDeletingUser
 #openai
 import openai
 openai.api_key = settings.OPENAI_API_KEY
@@ -615,7 +615,31 @@ class ResetPasswordView(APIView):
             return Response({"message": "Password has been reset successfully."}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error" : e}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
 
 
+class DeleteUserView(DestroyAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [IsSelfOrAdminDeletingUser]
+
+    @swagger_auto_schema(
+        operation_summary="Delete user (self or admin)",
+        operation_description="""
+        - Users can delete **their own** account.<br>
+        - Admins can delete **other users** but **not themselves**.
+        """,
+        tags=['profile'],
+        responses={
+            204: openapi.Response(description="User deleted"),
+            403: openapi.Response(description="Forbidden"),
+            404: openapi.Response(description="User not found"),
+        }
+    )
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(
+            {"detail": "User deleted successfully."},
+            status=status.HTTP_200_OK
+        )
         

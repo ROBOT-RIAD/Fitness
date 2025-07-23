@@ -50,6 +50,9 @@ class WorkoutAdminViewSet(ModelViewSet):
     pagination_class = CustomPageNumberPagination
     parser_classes = [MultiPartParser, FormParser]
 
+    def get_queryset(self):
+        return Workout.objects.all().order_by('-created_at')
+
     @swagger_auto_schema(operation_summary="List all English workouts (Admin only)", tags=["Workout"])
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
@@ -135,15 +138,27 @@ class WorkoutAdminViewSet(ModelViewSet):
 
             spanish_workout = getattr(workout, 'related_workout', None)
             if spanish_workout:
-                spanish_serializer = WorkoutSpanishSerializer(spanish_workout, data=spanish_data, partial=False)
+                # Update existing WorkoutSpanish instance
+                spanish_serializer = WorkoutSpanishSerializer(spanish_workout, data=spanish_data, partial=True)
                 spanish_serializer.is_valid(raise_exception=True)
                 spanish_serializer.save()
             else:
-                spanish_serializer = WorkoutSpanishSerializer(data=spanish_data)
-                spanish_serializer.is_valid(raise_exception=True)
-                spanish_workout = spanish_serializer.save()
-                updated_workout.related_workout = spanish_workout
-                updated_workout.save()
+                # Check if a WorkoutSpanish instance already exists with the same unique_id
+                try:
+                    spanish_workout = WorkoutSpanish.objects.get(unique_id=updated_workout.unique_id)
+                    # If found, update it
+                    spanish_serializer = WorkoutSpanishSerializer(spanish_workout, data=spanish_data, partial=True)
+                    spanish_serializer.is_valid(raise_exception=True)
+                    spanish_workout = spanish_serializer.save()
+                    updated_workout.related_workout = spanish_workout
+                    updated_workout.save()
+                except WorkoutSpanish.DoesNotExist:
+                    # If it doesn't exist, create a new one
+                    spanish_serializer = WorkoutSpanishSerializer(data=spanish_data)
+                    spanish_serializer.is_valid(raise_exception=True)
+                    spanish_workout = spanish_serializer.save()
+                    updated_workout.related_workout = spanish_workout
+                    updated_workout.save()
 
             return Response(serializer.data)
         except Exception as e:

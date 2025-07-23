@@ -11,12 +11,12 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .pagination import CustomPageNumberPagination
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.conf import settings
-from rest_framework import status
+from rest_framework import status,generics, filters
 from rest_framework.response import Response
 from rest_framework.views import APIView
 # Create your views here.
 from .translate import translate_to_english,translate_to_spanish
-
+from django.db.models import Q
 
 
 
@@ -53,7 +53,10 @@ class RecipeAdminViewSet(ModelViewSet):
     filterset_fields = ['for_time']
     pagination_class = CustomPageNumberPagination
     parser_classes = [MultiPartParser, FormParser]
+    
 
+    def get_queryset(self):
+        return Recipe.objects.all().order_by('-created_at')
 
     @swagger_auto_schema(operation_summary="List all English recipes (Admin only)", tags=["Recipe"])
     def list(self, request, *args, **kwargs):
@@ -408,3 +411,79 @@ class SpanishSingleRecipeDetailAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+
+
+class RecipeListView(generics.ListAPIView):
+    serializer_class = RecipeSerializer
+    queryset = Recipe.objects.all()
+    filter_backends = [SearchFilter]
+    search_fields = ['recipe_name']
+    pagination_class=None
+
+    @swagger_auto_schema(manual_parameters=[
+        openapi.Parameter(
+            'search',
+            openapi.IN_QUERY,
+            description="Search by recipe name",
+            type=openapi.TYPE_STRING
+        ),
+        openapi.Parameter(
+            'tags',
+            openapi.IN_QUERY,
+            description="Comma-separated tags to filter (e.g., 'spicy,quick')",
+            type=openapi.TYPE_STRING
+        ),
+    ],tags=["User Recipe"],)
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+
+    def get_queryset(self):
+        queryset = super().get_queryset().order_by('-created_at')
+        tags = self.request.query_params.get('tags')
+
+        if tags:
+            tag_list = [tag.strip().lower() for tag in tags.split(',')]
+            query = Q()
+            for tag in tag_list:
+                query |= Q(tag__icontains=tag)
+            queryset = queryset.filter(query)
+
+        return queryset
+    
+
+class SpanishRecipeListView(generics.ListAPIView):
+    serializer_class = RecipeSpanishSerializer
+    queryset = RecipeSpanish.objects.all()
+    filter_backends = [SearchFilter]
+    search_fields = ['recipe_name']
+    pagination_class=None
+
+    @swagger_auto_schema(manual_parameters=[
+        openapi.Parameter(
+            'search',
+            openapi.IN_QUERY,
+            description="Search by recipe name",
+            type=openapi.TYPE_STRING
+        ),
+        openapi.Parameter(
+            'tags',
+            openapi.IN_QUERY,
+            description="Comma-separated tags to filter (e.g., 'spicy,quick')",
+            type=openapi.TYPE_STRING
+        ),
+    ],tags=["User Recipe"],)
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+
+    def get_queryset(self):
+        queryset = super().get_queryset().order_by('-created_at')
+        tags = self.request.query_params.get('tags')
+
+        if tags:
+            tag_list = [tag.strip().lower() for tag in tags.split(',')]
+            query = Q()
+            for tag in tag_list:
+                query |= Q(tag__icontains=tag)
+            queryset = queryset.filter(query)
+
+        return queryset

@@ -7,8 +7,6 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 
 
-
-
 class RegisterSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(required= True)
     password = serializers.CharField(write_only=True)
@@ -28,12 +26,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         ProfileSpanish.objects.create(user=user)
         return user
     
-
-
-
-
-
-
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     email = serializers.EmailField()
@@ -77,11 +69,6 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         return token
     
 
-
-
-
-
-
 class ExtendedFileField(serializers.FileField):
     def to_representation(self, value):
         if value:
@@ -93,12 +80,6 @@ class ExtendedFileField(serializers.FileField):
         return None
 
 
-
-
-
-
-
-
 class ExtendedFileField(serializers.FileField):
     def to_representation(self, value):
         if value:
@@ -108,8 +89,6 @@ class ExtendedFileField(serializers.FileField):
                 return request.build_absolute_uri(url)
             return url
         return None
-
-
 
 
 class ProfileSerializer(serializers.ModelSerializer):
@@ -137,7 +116,6 @@ class ProfileSerializer(serializers.ModelSerializer):
         return instance
     
 
-
 class ProfileSpanishSerializer(serializers.ModelSerializer):
     image = ExtendedFileField(required=False)
     at_home = MultiSelectListField(required=False)
@@ -162,8 +140,6 @@ class ProfileSpanishSerializer(serializers.ModelSerializer):
         return instance
     
 
-
-
 class SendOTPSerializer(serializers.Serializer):
     email = serializers.EmailField()
 
@@ -173,12 +149,9 @@ class SendOTPSerializer(serializers.Serializer):
         return value
     
 
-
 class VerifyOTPSerializer(serializers.Serializer):
     email = serializers.EmailField()
     otp = serializers.CharField(max_length=4)
-
-
 
 
 class ResetPasswordSerializer(serializers.Serializer):
@@ -189,3 +162,18 @@ class ResetPasswordSerializer(serializers.Serializer):
         if attrs['new_password'] != attrs['confirm_password']:
             raise serializers.ValidationError({"confirm_password": "Passwords do not match."})
         return attrs
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = [
+            'id',
+            'email',
+            'username',
+            'role',
+            'first_name',
+            'last_name',
+            'date_joined',
+        ]
+        read_only_fields = ['id', 'date_joined']

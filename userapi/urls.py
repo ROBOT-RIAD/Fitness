@@ -1,11 +1,17 @@
-from django.urls import path
+
+from django.urls import path,include
+from rest_framework.routers import DefaultRouter
 from meal.views import GenerateMealPlanView
 from workoutplan.views import GenerateWorkoutPlanView,ActiveWorkoutPlanView,CompleteTodayWorkoutView,DailyWorkoutDetailsView,SpanishDailyWorkoutDetailsView,TodayWorkoutView,SpanishWorkoutEntryListView,UpdateTodayWorkoutEntryAPIView
 from .views import UserFullInfoAPIView,UserSpanishFullInfoAPIView
 from meal.views import DaywiseMealInfoAPIView,SpanishDaywiseMealInfoAPIView,DailyMealDetailAPIView,SpanishDailyMealDetailAPIView,TodaysMealAPIView,SpanishTodaysMealAPIView,UpdateMealCompletionStatusAPIView
-from recipe.views import SingleRecipeDetailAPIView,SpanishSingleRecipeDetailAPIView
+from recipe.views import SingleRecipeDetailAPIView,SpanishSingleRecipeDetailAPIView,RecipeListView,SpanishRecipeListView
 from workout.views import GetEnglishWorkoutByUniqueIdView, GetSpanishWorkoutByUniqueIdView
 from home.views import TodayDailyDetailsAPIView
+from accounts.views import DeleteUserView
+router = DefaultRouter()
+
+
 urlpatterns = [
     path("meal-plans/generate/", GenerateMealPlanView.as_view(), name="generate-meal-plan"),
     path("workout-plans/generate/", GenerateWorkoutPlanView.as_view(), name="generate-meal-plan"),
@@ -30,5 +36,9 @@ urlpatterns = [
     path('spanish-workouts/today/', SpanishWorkoutEntryListView.as_view(), name='spanish-today-workouts'),
     path('workout/update-today-entry/<int:pk>/',UpdateTodayWorkoutEntryAPIView.as_view(),name='update-today-workout-entry'),
     path('plans/today/', TodayDailyDetailsAPIView.as_view(), name='today-plans'),
+    path('recipes/', RecipeListView.as_view(), name='recipe-list'),
+    path('spanish/recipes/', SpanishRecipeListView.as_view(), name='spanish-recipe-list'),
+    path('delete-user/<int:pk>/', DeleteUserView.as_view(), name='delete-account'),
+    path('', include(router.urls)),
 ]
 
