@@ -31,10 +31,31 @@ class UserFullInfoAPIView(APIView):
         meal_plans_qs = MealPlan.objects.filter(user=user, is_completed=False, is_cancelled=False)
         workout_plans_qs = WorkoutPlan.objects.filter(user=user, is_completed=False, is_cancelled=False)
 
+        if not meal_plans_qs.exists():
+            # Query for the most recent completed meal plan
+            recent_completed_meal_plan = MealPlan.objects.filter(user=user, is_completed=True, is_cancelled=False).order_by('-end_date').first()
+            meal_plan_data = {
+                "id": recent_completed_meal_plan.id if recent_completed_meal_plan else None,
+                "is_completed": recent_completed_meal_plan.is_completed if recent_completed_meal_plan else None
+            }
+        else:
+            meal_plan_data = MealPlanInfoSerializer(meal_plans_qs, many=True).data
+
+        # Check if there are no active workout plans
+        if not workout_plans_qs.exists():
+            # Query for the most recent completed workout plan
+            recent_completed_workout_plan = WorkoutPlan.objects.filter(user=user, is_completed=True, is_cancelled=False).order_by('-end_date').first()
+            workout_plan_data = {
+                "id": recent_completed_workout_plan.id if recent_completed_workout_plan else None,
+                "is_completed": recent_completed_workout_plan.is_completed if recent_completed_workout_plan else None
+            }
+        else:
+            workout_plan_data = WorkoutPlanInfoSerializer(workout_plans_qs, many=True).data
+
         return Response({
             "profile": profile_data,
-            "meal_plans": MealPlanInfoSerializer(meal_plans_qs, many=True).data,
-            "workout_plans": WorkoutPlanInfoSerializer(workout_plans_qs, many=True).data,
+            "meal_plans": meal_plan_data,
+            "workout_plans": workout_plan_data,
         })
 
 
@@ -57,10 +78,31 @@ class UserSpanishFullInfoAPIView(APIView):
         meal_plans_qs = MealPlan.objects.filter(user=user, is_completed=False, is_cancelled=False)
         workout_plans_qs = WorkoutPlan.objects.filter(user=user, is_completed=False, is_cancelled=False)
 
+        if not meal_plans_qs.exists():
+            # Query for the most recent completed meal plan
+            recent_completed_meal_plan = MealPlan.objects.filter(user=user, is_completed=True, is_cancelled=False).order_by('-end_date').first()
+            meal_plan_data = {
+                "id": recent_completed_meal_plan.id if recent_completed_meal_plan else None,
+                "is_completed": recent_completed_meal_plan.is_completed if recent_completed_meal_plan else None
+            }
+        else:
+            meal_plan_data = MealPlanInfoSerializer(meal_plans_qs, many=True).data
+
+        # Check if there are no active workout plans
+        if not workout_plans_qs.exists():
+            # Query for the most recent completed workout plan
+            recent_completed_workout_plan = WorkoutPlan.objects.filter(user=user, is_completed=True, is_cancelled=False).order_by('-end_date').first()
+            workout_plan_data = {
+                "id": recent_completed_workout_plan.id if recent_completed_workout_plan else None,
+                "is_completed": recent_completed_workout_plan.is_completed if recent_completed_workout_plan else None
+            }
+        else:
+            workout_plan_data = WorkoutPlanInfoSerializer(workout_plans_qs, many=True).data
+ 
         data = {
             "profile": profile_data,
-            "meal_plans": MealPlanInfoSerializer(meal_plans_qs, many=True).data,
-            "workout_plans": WorkoutPlanInfoSerializer(workout_plans_qs, many=True).data,
+            "meal_plans": meal_plan_data,
+            "workout_plans": workout_plan_data,
         }
 
         translated_data = translate_to_spanish(data)

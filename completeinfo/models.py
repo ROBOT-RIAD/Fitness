@@ -2,13 +2,11 @@ from django.db import models
 from accounts.models import User
 from meal.models import MealPlan
 from workoutplan.models import WorkoutPlan
+
+
 # Create your models here.
-
-
-
 class FitnessProfile(models.Model):
     user = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name='fitness_profiles')
-    
     current_weight = models.FloatField(null=True, blank=True)
     abdominal = models.FloatField(null=True, blank=True)
     sacroiliac = models.FloatField(null=True, blank=True)
@@ -23,6 +21,10 @@ class FitnessProfile(models.Model):
     # New optional relationship fields
     meal_plan = models.ForeignKey(MealPlan, null=True, blank=True, on_delete=models.SET_NULL, related_name='fitness_profiles')
     workout_plan = models.ForeignKey(WorkoutPlan, null=True, blank=True, on_delete=models.SET_NULL, related_name='fitness_profiles')
+
+    # Fields to track when the profile was created and last updated
+    created_at = models.DateTimeField(auto_now_add=True)  # Automatically set when the object is created
+    updated_at = models.DateTimeField(auto_now=True)  # Automatically set to the current timestamp whenever the object is updated
 
     def __str__(self):
         return f"Fitness Profile for {self.user.email if self.user else 'Unknown User'} (Weight: {self.current_weight}kg, Feeling: {self.feeling})"
