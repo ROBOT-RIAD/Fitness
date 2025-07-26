@@ -11,6 +11,7 @@ from accounts.models import Profile
 from accounts.permissions import IsUserRole
 from .serializers import TrainingDataSerializer,WorkoutEntrySerializer, WorkoutEntryUpdateSerializer
 from .services import build_workout_plan
+from rest_framework.request import Request
 
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
@@ -116,7 +117,6 @@ class GenerateWorkoutPlanView(APIView):
             "workout_plan_name": workout_plan_name,
             "tags": tags
         }, status=status.HTTP_201_CREATED)
-
 
 
 class ActiveWorkoutPlanView(APIView):
@@ -278,7 +278,6 @@ class CompleteTodayWorkoutView(APIView):
         }, status=200)
 
 
-
 class DailyWorkoutDetailsView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -294,7 +293,7 @@ class DailyWorkoutDetailsView(APIView):
             return Response({"detail": "Daily workout not found."}, status=status.HTTP_404_NOT_FOUND)
 
         workout_entries = WorkoutEntry.objects.filter(daily_workout=daily_workout).select_related('workout')
-        serializer = WorkoutEntrySerializer(workout_entries, many=True)
+        serializer = WorkoutEntrySerializer(workout_entries, many=True,context={'request': request})
 
         # Summary calculations
         total_duration_minutes = 0
@@ -315,8 +314,6 @@ class DailyWorkoutDetailsView(APIView):
                 "total_calories_burn": total_calories
             }
         }, status=200)
-
-
 
 
 class SpanishDailyWorkoutDetailsView(APIView):
@@ -383,7 +380,6 @@ class SpanishDailyWorkoutDetailsView(APIView):
         }, status=200)
     
 
-
 class TodayWorkoutView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -412,17 +408,20 @@ class TodayWorkoutView(APIView):
         workouts_data = []
         total_duration = 0
         total_calories = 0
+        
 
         for entry in entries:
+            val = entry.id
             if entry.workout:
                 workout = entry.workout
                 duration_minutes = workout.time_needed.total_seconds() / 60
                 calories = float(workout.calories_burn)
-
+                    
                 workouts_data.append({
                     "date": entry.daily_workout.date,
                     "set_of": entry.set_of,
                     "reps": entry.reps,
+                    "id": val,
                     "completed": entry.completed,
                     "workout": {
                         "workout_name": workout.workout_name,
@@ -432,7 +431,7 @@ class TodayWorkoutView(APIView):
                         "calories_burn": str(workout.calories_burn),
                         "equipment_needed": workout.equipment_needed,
                         "tag": workout.tag,
-                        "image": workout.image.url if workout.image else None,
+                        "image": request.build_absolute_uri(workout.image.url) if workout.image else None,
                         "benefits": workout.benefits,
                         "unique_id": workout.unique_id,
                     }
@@ -451,7 +450,6 @@ class TodayWorkoutView(APIView):
             }
         })
     
-
 
 class SpanishWorkoutEntryListView(APIView):
     @swagger_auto_schema(
@@ -490,6 +488,7 @@ class SpanishWorkoutEntryListView(APIView):
                 total_calories += spanish.calories_burn
 
                 workouts_data.append({
+                    "id":entry.id,
                     "completed": entry.completed,
                     "set_of": entry.set_of,
                     "reps": entry.reps,
@@ -502,7 +501,7 @@ class SpanishWorkoutEntryListView(APIView):
                         "calories_burn": float(spanish.calories_burn),
                         "equipment_needed": spanish.equipment_needed,
                         "tag": spanish.tag,
-                        "image" : spanish.image.url,
+                        "image" : request.build_absolute_uri(spanish.image.url) if spanish.image.url else None,
                         "benefits":spanish.benefits,
                         "unique_id":spanish.unique_id,
 
@@ -519,8 +518,6 @@ class SpanishWorkoutEntryListView(APIView):
             }
         })
     
-
-
 
 class UpdateTodayWorkoutEntryAPIView(APIView):
     permission_classes = [IsAuthenticated]

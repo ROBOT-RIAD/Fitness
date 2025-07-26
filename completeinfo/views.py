@@ -2,12 +2,15 @@ from rest_framework import status, serializers
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from meal.models import MealPlan
-from workoutplan.models import WorkoutPlan
-from .models import FitnessProfile
-from .serializers import FitnessProfileSerializer
+from meal.models import MealPlan,DailyMeal
+from workoutplan.models import WorkoutPlan,DailyWorkout
+from .models import FitnessProfile,Achievement
+from .serializers import FitnessProfileSerializer,UserAchievementSerializer
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from accounts.models import Profile
+from accounts.models import User
+from django.db.models import Max
 
 class FitnessProfileCreateView(APIView):
     permission_classes = [IsAuthenticated]
@@ -25,10 +28,6 @@ class FitnessProfileCreateView(APIView):
             400: openapi.Response(description="Bad Request, at least one of `meal_plan_id` or `workout_plan_id` must be provided"),
             404: openapi.Response(description="Not Found, if MealPlan or WorkoutPlan does not exist"),
         },
-        manual_parameters=[
-            openapi.Parameter('meal_plan_id', openapi.IN_FORM, description="ID of the MealPlan (optional)", type=openapi.TYPE_INTEGER),
-            openapi.Parameter('workout_plan_id', openapi.IN_FORM, description="ID of the WorkoutPlan (optional)", type=openapi.TYPE_INTEGER),
-        ]
     )
     def post(self, request, *args, **kwargs):
         # Get the authenticated user
@@ -76,6 +75,34 @@ class FitnessProfileCreateView(APIView):
                 status=status.HTTP_409_CONFLICT
             )
         
+        # Get Profile data
+        profile = user.profile
+        profile_weight = float(profile.weight if profile.weight is not None else 0)
+        profile_abdominal = float(profile.abdominal if profile.abdominal is not None else 0)
+        profile_sacroiliac = float(profile.sacroiliac if profile.sacroiliac is not None else 0)
+        profile_subscapularis = float(profile.subscapularis if profile.subscapularis is not None else 0)
+        profile_triceps = float(profile.triceps if profile.triceps is not None else 0)
+        
+
+        # Extract incoming data
+        request_weight = float(request.data.get('current_weight'))
+        request_abdominal = float(request.data.get('abdominal'))
+        request_sacroiliac = float(request.data.get('sacroiliac'))
+        request_subscapularis = float(request.data.get('subscapularis'))
+        request_triceps = float(request.data.get('triceps'))
+
+        weight_change = request_weight - profile_weight
+        abdominal_change = request_abdominal - profile_abdominal
+        sacrolic_change =  request_sacroiliac - profile_sacroiliac
+        subscapularis_change = request_subscapularis - profile_subscapularis
+        triceps_change = request_triceps - profile_triceps
+
+        weight_increase = True if request_weight >= profile_weight else False
+        abdominal_increase =True if request_abdominal >= profile_abdominal else False
+        sacrolic_increase = True if request_sacroiliac >= profile_sacroiliac else False
+        subscapularis_increase = True if request_subscapularis >= profile_subscapularis else False
+        triceps_increase = True if request_triceps >= profile_triceps else False
+        
         # Prepare the data to be passed into the serializer
         data = {
             'user': user.id,
@@ -98,6 +125,106 @@ class FitnessProfileCreateView(APIView):
         if serializer.is_valid():
             # Save the FitnessProfile instance
             serializer.save(user=user, meal_plan=meal_plan, workout_plan=workout_plan)
+           
+            achievement, created = Achievement.objects.update_or_create(
+                    user=user,
+                    defaults={
+                        'weight_change': weight_change,
+                        'abdominal_change': abdominal_change,
+                        'sacrolic_change': sacrolic_change,
+                        'subscapularis_change': subscapularis_change,
+                        'triceps_change': triceps_change,
+                        'weight_increase': weight_increase,
+                        'abdominal_increase': abdominal_increase,
+                        'sacrolic_increase': sacrolic_increase,
+                        'subscapularis_increase': subscapularis_increase,
+                        'triceps_increase': triceps_increase
+                    }
+                )
+            achievement.save()
+
+            profile.weight = request_weight
+            profile.abdominal = request_abdominal
+            profile.sacroiliac = request_sacroiliac
+            profile.subscapularis = request_subscapularis
+            profile.triceps = request_triceps
+            profile.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
+
+
+class UserAchievementDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_summary="Get user achievement, latest meal plan, and latest workout plan",
+        operation_description="Fetch the authenticated user's achievement details, the latest completed meal plan, and the latest completed workout plan, including their progress.",
+        responses={
+            200: openapi.Response(
+                description="Successfully fetched achievement and plans",
+                schema=UserAchievementSerializer,
+            ),
+            404: openapi.Response(
+                description="Not Found: No achievement or plans found for the user",
+                examples={"application/json": {"detail": "Not found."}},
+            ),
+            400: openapi.Response(
+                description="Bad Request: Invalid or incomplete request",
+                examples={"application/json": {"detail": "Invalid request."}},
+            ),
+        },
+        tags=["User Achievement"]
+    )
+    def get(self, request, *args, **kwargs):
+        # Get the authenticated user
+        user = request.user
+
+        # Get the latest completed MealPlan
+        latest_meal_plan = MealPlan.objects.filter(user=user, is_completed=True).order_by('-end_date').first()
+
+        # Get the latest completed WorkoutPlan
+        latest_workout_plan = WorkoutPlan.objects.filter(user=user, is_completed=True).order_by('-end_date').first()
+
+        # Get the Achievement of the user
+        achievement = Achievement.objects.filter(user=user).first()
+
+        # Count total completed workout days for the latest workout plan
+        total_completed_workout_days = DailyWorkout.objects.filter(
+            workout_plan=latest_workout_plan, completed=True
+        ).count() if latest_workout_plan else 0
+
+        # Count total completed meal days for the latest meal plan
+        total_completed_meal_days = DailyMeal.objects.filter(
+            meal_plan=latest_meal_plan
+        ).filter(
+            meals__completed=True
+        ).distinct().count() if latest_meal_plan else 0
+
+        fitness_profiles = FitnessProfile.objects.filter(user=user)
+        weights_list = [profile.current_weight for profile in fitness_profiles]
+
+        # Prepare the data to send in response
+        data = {
+            'achievement': achievement,
+            'latest_meal_plan': latest_meal_plan,
+            'latest_workout_plan': latest_workout_plan,
+            'total_completed_workout_days': total_completed_workout_days,
+            'total_completed_meal_days': total_completed_meal_days,
+        }
+        print(total_completed_workout_days,total_completed_meal_days)
+
+        # Serialize the response
+        serializer = UserAchievementSerializer(user, context={'request': request})
+
+        return Response({
+            'info':serializer.data,
+            'total_completed_workout_days': total_completed_workout_days,
+            'total_completed_meal_days': total_completed_meal_days,
+            'weights_list': weights_list,
+        }, status=status.HTTP_200_OK)

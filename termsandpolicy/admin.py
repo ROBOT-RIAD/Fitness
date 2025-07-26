@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import TermsAndConditions, PrivacyPolicy
+from .models import TermsAndConditions, PrivacyPolicy,Email
 # Register your models here.
 
 
@@ -41,3 +41,19 @@ class PrivacyPolicyAdmin(admin.ModelAdmin):
     def short_text(self, obj):
         return obj.text[:75] + "..." if len(obj.text) > 75 else obj.text
     short_text.short_description = "Privacy Policy"
+
+
+
+@admin.register(Email)
+class EmailAdmin(admin.ModelAdmin):
+    # Fields to display in the list view
+    list_display = ('user', 'subject', 'sent_at', 'sent_status')
+
+    # Add search functionality for the title and user email
+    search_fields = ('user__email', 'subject')
+
+    # Add filters (e.g., filter by sent status)
+    list_filter = ('sent_status',)
+
+    # Set the default ordering (order by sent_at in descending order)
+    ordering = ('-sent_at',)

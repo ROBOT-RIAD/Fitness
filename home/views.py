@@ -13,9 +13,11 @@ from rest_framework import status
 from AiChat.models import HealthProfile
 
 
+
+
+
 class TodayDailyDetailsAPIView(APIView):
     permission_classes = [IsAuthenticated]
-
     @swagger_auto_schema(
         operation_summary="Get DailyMeal & DailyWorkout by date (default: today)",
         tags=["home"],
@@ -59,5 +61,5 @@ class TodayDailyDetailsAPIView(APIView):
             "daily_meal": DailyMealTodaySerializer(daily_meal).data if daily_meal else None,
             "daily_workout": DailyWorkoutTodaySerializer(daily_workout).data if daily_workout else None,
             "AiRecomended":serializer.data,
-        })
+})
 

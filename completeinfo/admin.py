@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import FitnessProfile
+from .models import FitnessProfile,Achievement
 
 # Customize the admin interface for FitnessProfile
 class FitnessProfileAdmin(admin.ModelAdmin):
@@ -24,5 +24,24 @@ class FitnessProfileAdmin(admin.ModelAdmin):
     )
     readonly_fields = ('created_at', 'updated_at')
 
+
+
+class AchievementAdmin(admin.ModelAdmin):
+    # Exclude non-editable fields like 'create_time', 'update_time', and 'achievement_date'
+    exclude = ('create_time', 'update_time', 'achievement_date')
+
+    # Optionally, you can specify the fields you want to display in the form
+    fields = ['user', 'weight_change', 'abdominal_change', 'sacrolic_change', 
+              'subscapularis_change', 'triceps_change', 'weight_increase', 
+              'abdominal_increase', 'sacrolic_increase', 'subscapularis_increase', 
+              'triceps_increase']
+
+    # You can also specify which fields are displayed in the list view
+    list_display = ['user', 'weight_change', 'abdominal_change', 'sacrolic_change', 
+                    'subscapularis_change', 'triceps_change', 'achievement_date']
+    
+    
+
 # Register the FitnessProfile model with custom admin
 admin.site.register(FitnessProfile, FitnessProfileAdmin)
+admin.site.register(Achievement, AchievementAdmin)

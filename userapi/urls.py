@@ -9,7 +9,7 @@ from recipe.views import SingleRecipeDetailAPIView,SpanishSingleRecipeDetailAPIV
 from workout.views import GetEnglishWorkoutByUniqueIdView, GetSpanishWorkoutByUniqueIdView
 from home.views import TodayDailyDetailsAPIView
 from accounts.views import DeleteUserView
-from completeinfo.views import FitnessProfileCreateView
+from completeinfo.views import FitnessProfileCreateView,UserAchievementDetailView
 router = DefaultRouter()
 
 
@@ -41,6 +41,7 @@ urlpatterns = [
     path('spanish/recipes/', SpanishRecipeListView.as_view(), name='spanish-recipe-list'),
     path('delete-user/<int:pk>/', DeleteUserView.as_view(), name='delete-account'),
     path('create/', FitnessProfileCreateView.as_view(), name='create_fitness_profile'),
+    path('achievement/details/', UserAchievementDetailView.as_view(), name='user-achievement-details'),
     path('', include(router.urls)),
 ]
 

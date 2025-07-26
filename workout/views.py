@@ -314,7 +314,7 @@ class GetEnglishWorkoutByUniqueIdView(APIView):
         if not workout:
             return Response({"detail": "Workout not found."}, status=status.HTTP_404_NOT_FOUND)
         
-        serializer = WorkoutSerializer(workout)
+        serializer = WorkoutSerializer(workout,context={'request': request})
         return Response(serializer.data, status=200)
     
 
@@ -336,7 +336,7 @@ class GetSpanishWorkoutByUniqueIdView(APIView):
         if not workout:
             return Response({"detail": "Spanish workout not found."}, status=status.HTTP_404_NOT_FOUND)
         
-        serializer = WorkoutSpanishSerializer(workout)
+        serializer = WorkoutSpanishSerializer(workout,context={'request': request})
         return Response(serializer.data, status=200)
 
 

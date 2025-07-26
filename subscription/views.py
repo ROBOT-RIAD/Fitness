@@ -37,6 +37,7 @@ class PackageViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         data = serializer.validated_data
+        print(data)
 
         # Create Stripe Product
         stripe_product = stripe.Product.create(

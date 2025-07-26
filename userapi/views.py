@@ -36,7 +36,12 @@ class UserFullInfoAPIView(APIView):
             recent_completed_meal_plan = MealPlan.objects.filter(user=user, is_completed=True, is_cancelled=False).order_by('-end_date').first()
             meal_plan_data = {
                 "id": recent_completed_meal_plan.id if recent_completed_meal_plan else None,
-                "is_completed": recent_completed_meal_plan.is_completed if recent_completed_meal_plan else None
+                "meal_plan_name": recent_completed_meal_plan.meal_plan_name if recent_completed_meal_plan else None,
+                "tags": recent_completed_meal_plan.tags if recent_completed_meal_plan else None,
+                "start_date": recent_completed_meal_plan.start_date if recent_completed_meal_plan else None,
+                "end_date": recent_completed_meal_plan.end_date if recent_completed_meal_plan else None,
+                "is_completed": recent_completed_meal_plan.is_completed if recent_completed_meal_plan else None,
+                "is_cancelled": recent_completed_meal_plan.is_cancelled if recent_completed_meal_plan else None,
             }
         else:
             meal_plan_data = MealPlanInfoSerializer(meal_plans_qs, many=True).data
@@ -47,7 +52,12 @@ class UserFullInfoAPIView(APIView):
             recent_completed_workout_plan = WorkoutPlan.objects.filter(user=user, is_completed=True, is_cancelled=False).order_by('-end_date').first()
             workout_plan_data = {
                 "id": recent_completed_workout_plan.id if recent_completed_workout_plan else None,
-                "is_completed": recent_completed_workout_plan.is_completed if recent_completed_workout_plan else None
+                "workout_plan_name": recent_completed_workout_plan.workout_plan_name if recent_completed_workout_plan else None,
+                "tags": recent_completed_workout_plan.tags if recent_completed_workout_plan else None,
+                "start_date": recent_completed_workout_plan.start_date if recent_completed_workout_plan else None,
+                "end_date": recent_completed_workout_plan.end_date if recent_completed_workout_plan else None,
+                "is_completed": recent_completed_workout_plan.is_completed if recent_completed_workout_plan else None,
+                "is_cancelled": recent_completed_workout_plan.is_cancelled if recent_completed_workout_plan else None,
             }
         else:
             workout_plan_data = WorkoutPlanInfoSerializer(workout_plans_qs, many=True).data
@@ -83,7 +93,12 @@ class UserSpanishFullInfoAPIView(APIView):
             recent_completed_meal_plan = MealPlan.objects.filter(user=user, is_completed=True, is_cancelled=False).order_by('-end_date').first()
             meal_plan_data = {
                 "id": recent_completed_meal_plan.id if recent_completed_meal_plan else None,
-                "is_completed": recent_completed_meal_plan.is_completed if recent_completed_meal_plan else None
+                "meal_plan_name": recent_completed_meal_plan.meal_plan_name if recent_completed_meal_plan else None,
+                "tags": recent_completed_meal_plan.tags if recent_completed_meal_plan else None,
+                "start_date": recent_completed_meal_plan.start_date if recent_completed_meal_plan else None,
+                "end_date": recent_completed_meal_plan.end_date if recent_completed_meal_plan else None,
+                "is_completed": recent_completed_meal_plan.is_completed if recent_completed_meal_plan else None,
+                "is_cancelled": recent_completed_meal_plan.is_cancelled if recent_completed_meal_plan else None,
             }
         else:
             meal_plan_data = MealPlanInfoSerializer(meal_plans_qs, many=True).data
@@ -94,7 +109,12 @@ class UserSpanishFullInfoAPIView(APIView):
             recent_completed_workout_plan = WorkoutPlan.objects.filter(user=user, is_completed=True, is_cancelled=False).order_by('-end_date').first()
             workout_plan_data = {
                 "id": recent_completed_workout_plan.id if recent_completed_workout_plan else None,
-                "is_completed": recent_completed_workout_plan.is_completed if recent_completed_workout_plan else None
+                "workout_plan_name": recent_completed_workout_plan.workout_plan_name if recent_completed_workout_plan else None,
+                "tags": recent_completed_workout_plan.tags if recent_completed_workout_plan else None,
+                "start_date": recent_completed_workout_plan.start_date if recent_completed_workout_plan else None,
+                "end_date": recent_completed_workout_plan.end_date if recent_completed_workout_plan else None,
+                "is_completed": recent_completed_workout_plan.is_completed if recent_completed_workout_plan else None,
+                "is_cancelled": recent_completed_workout_plan.is_cancelled if recent_completed_workout_plan else None,
             }
         else:
             workout_plan_data = WorkoutPlanInfoSerializer(workout_plans_qs, many=True).data
