@@ -3,6 +3,7 @@ from accounts.models import User
 from meal.models import MealPlan
 from workoutplan.models import WorkoutPlan
 
+
 # Create your models here.
 class FitnessProfile(models.Model):
     user = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name='fitness_profiles')

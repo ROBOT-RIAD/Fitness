@@ -18,12 +18,6 @@ class MealPlanWriteSerializer(serializers.Serializer):
     daily_meals    = DailyMealWriteSerializer(many=True)
 
 
-
-
-
-
-
-
 class DaywiseRecipeMinimalSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
@@ -46,10 +40,6 @@ class DaywiseDailyMealSerializer(serializers.ModelSerializer):
         fields = ['id','date', 'meals']
 
 
-
-
-
-
 class FullRecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
@@ -61,15 +51,21 @@ class MealEntryWithFullRecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MealEntry
-        fields = ['meal_type', 'recipe','completed','id']
+        fields = ['grams','eating_time','meal_type', 'recipe','completed','id']
+
 
 class RecipeSpanishSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
     class Meta:
         model = RecipeSpanish
         fields = '__all__'
+        read_only_fields = ['image_url']
 
-
-
+    def get_image_url(self, obj):
+        request = self.context.get('request')
+        if obj.image:
+            return request.build_absolute_uri(obj.image.url)  # Build the full URL
+        return None
 
 
 MEAL_TYPE_TRANSLATIONS = {
@@ -89,17 +85,18 @@ class MealEntryWithFullRecipeSpanishSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MealEntry
-        fields = ['meal_type', 'recipe','completed','id']
+        fields = ['grams','eating_time','meal_type', 'recipe','completed','id']
     
     def get_recipe(self, obj):
         from recipe.models import RecipeSpanish
         if obj.recipe and obj.recipe.unique_id:
             try:
                 recipe_sp = RecipeSpanish.objects.get(unique_id=obj.recipe.unique_id)
-                return RecipeSpanishSerializer(recipe_sp).data
+                return RecipeSpanishSerializer(recipe_sp,context=self.context).data
             except RecipeSpanish.DoesNotExist:
                 return None
         return None
+
 
 
 

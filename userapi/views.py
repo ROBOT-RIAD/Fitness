@@ -8,10 +8,20 @@ from .serializers import ProfileInfoSerializer, MealPlanInfoSerializer, WorkoutP
 from .services import translate_to_spanish
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from subscription.decorators import subscription_required
 
 
 class UserFullInfoAPIView(APIView):
     permission_classes = [IsAuthenticated]
+
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
+    #     # Apply the decorator to all view methods
+    #     for method_name in ['get', 'post', 'put', 'delete']:
+    #         if hasattr(self, method_name):
+    #             method = getattr(self, method_name)
+    #             setattr(self, method_name, subscription_required(method))
+
 
     @swagger_auto_schema(
         operation_summary="Get active user info (English)",

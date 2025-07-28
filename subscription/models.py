@@ -4,6 +4,7 @@ from accounts.models import User
 # Create your models here.
 
 
+
 class Package(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField()
@@ -41,6 +42,10 @@ class Subscription(models.Model):
     def __str__(self):
         
         return f"{self.user.email} - {self.package_name}"
+    
+    def is_active_subscription(self):
+        # You can define the logic here, for example:
+        return self.is_active
     
 
 

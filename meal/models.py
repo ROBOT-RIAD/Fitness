@@ -38,7 +38,6 @@ class DailyMeal(models.Model):
 
 
 
-
 class MealEntry(models.Model):
     daily_meal = models.ForeignKey(DailyMeal, on_delete=models.CASCADE, related_name='meals')
     meal_type = models.CharField(max_length=50)  # Just a plain string now
@@ -47,6 +46,7 @@ class MealEntry(models.Model):
     cancelled = models.BooleanField(default=False) 
 
     eating_time = models.TimeField(null=True, blank=True)
+    grams = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

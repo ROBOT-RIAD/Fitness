@@ -88,6 +88,7 @@ Generate a {days}-day meal plan using the provided recipes and user profile.
 - You may add optional meals like snacks based on the user's lifestyle.
 - Do NOT return any day that skips any of those three meals.
 - ✅ Each meal entry MUST also include an `eating_time` in 24-hour format (HH:MM), appropriate to the meal type.
+- ✅ Each meal entry MUST also include the grams of food the user should eat (e.g., "grams": "300").
 
 ✅ Output format (MUST be valid JSON):
 {{

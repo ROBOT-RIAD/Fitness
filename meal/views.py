@@ -106,7 +106,8 @@ class GenerateMealPlanView(APIView):
                     daily_meal=daily,
                     meal_type=m["meal_type"],
                     recipe=recipe,  # can be None if not found
-                    eating_time=datetime.datetime.strptime(m["eating_time"], "%H:%M").time() if "eating_time" in m else None
+                    eating_time=datetime.datetime.strptime(m["eating_time"], "%H:%M").time() if "eating_time" in m else None,
+                    grams=m["grams"],
                 )
 
         # 7. Return response
@@ -167,7 +168,7 @@ class DaywiseMealInfoAPIView(APIView):
 
         # Fetch and return daily meals
         daily_meals = DailyMeal.objects.filter(meal_plan=meal_plan).order_by('date')
-        serializer = DaywiseDailyMealSerializer(daily_meals, many=True)
+        serializer = DaywiseDailyMealSerializer(daily_meals, many=True,context={'request': request})
         return Response({
         "status": {
             "day": total_days,
@@ -179,7 +180,6 @@ class DaywiseMealInfoAPIView(APIView):
         "days": serializer.data
     })
     
-
 
 class SpanishDaywiseMealInfoAPIView(APIView):
     permission_classes = [IsAuthenticated]
@@ -218,7 +218,7 @@ class SpanishDaywiseMealInfoAPIView(APIView):
                     total_calories += float(meal.recipe.calories)
 
         daily_meals = DailyMeal.objects.filter(meal_plan=meal_plan).order_by('date')
-        serializer = DaywiseDailyMealSerializer(daily_meals, many=True)
+        serializer = DaywiseDailyMealSerializer(daily_meals, many=True,context={'request': request})
         data = serializer.data
 
         # Predefined meal_type translation
@@ -292,7 +292,7 @@ class DailyMealDetailAPIView(APIView):
             return Response({"detail": "Not authorized for this meal."}, status=status.HTTP_403_FORBIDDEN)
 
         meal_entries = MealEntry.objects.filter(daily_meal=daily_meal).select_related('recipe')
-        serializer = MealEntryWithFullRecipeSerializer(meal_entries, many=True)
+        serializer = MealEntryWithFullRecipeSerializer(meal_entries, many=True,context={'request':request})
 
         # Aggregate nutritional stats (ignoring cancelled or missing recipes)
         stats = {
@@ -348,7 +348,7 @@ class SpanishDailyMealDetailAPIView(APIView):
             return Response({"detail": "Not authorized for this meal."}, status=status.HTTP_403_FORBIDDEN)
 
         meal_entries = MealEntry.objects.filter(daily_meal=daily_meal).select_related('recipe')
-        serializer = MealEntryWithFullRecipeSpanishSerializer(meal_entries, many=True)
+        serializer = MealEntryWithFullRecipeSpanishSerializer(meal_entries, many=True,context={'request':request})
         data = serializer.data
 
         # ✅ Translate meal_type to Spanish
@@ -412,7 +412,7 @@ class TodaysMealAPIView(APIView):
         # Fetch today's entries
         today_meal_entries = MealEntry.objects.filter(
             daily_meal__in=daily_meals_today
-        ).order_by('created_at')
+        ).order_by('-created_at')
 
         # 15-day range
         start_date = today - timedelta(days=14)
@@ -434,6 +434,7 @@ class TodaysMealAPIView(APIView):
             total_calories=Sum('recipe__calories'),
             total_protein=Sum('recipe__protein'),
             total_fat=Sum('recipe__fat'),
+            total_carbs=Sum('recipe__carbs'),
         )
 
         # Completed values
@@ -441,12 +442,13 @@ class TodaysMealAPIView(APIView):
             completed_calories=Sum('recipe__calories'),
             completed_protein=Sum('recipe__protein'),
             completed_fat=Sum('recipe__fat'),
+            completed_carbs=Sum('recipe__carbs'),
         )
 
         # Fallback if null
         def safe(val): return float(val) if val is not None else 0.0
 
-        serializer = MealEntryWithFullRecipeSerializer(today_meal_entries, many=True)
+        serializer = MealEntryWithFullRecipeSerializer(today_meal_entries, many=True,context={'request': request})
         return Response({
             "today_meals": serializer.data,
             "stats": {
@@ -454,11 +456,13 @@ class TodaysMealAPIView(APIView):
                     "calories": safe(total_nutrients["total_calories"]),
                     "protein": safe(total_nutrients["total_protein"]),
                     "fat": safe(total_nutrients["total_fat"]),
+                    "carbs": safe(total_nutrients["total_carbs"]),
                 },
                 "15_day_completed": {
                     "calories": safe(completed_nutrients["completed_calories"]),
                     "protein": safe(completed_nutrients["completed_protein"]),
                     "fat": safe(completed_nutrients["completed_fat"]),
+                    "carbs": safe(completed_nutrients["completed_carbs"]),
                 }
             }
         }, status=status.HTTP_200_OK)
@@ -492,7 +496,7 @@ class SpanishTodaysMealAPIView(APIView):
         # Get today's meal entries
         today_meal_entries = MealEntry.objects.filter(
             daily_meal__in=daily_meals_today
-        ).order_by('created_at')
+        ).order_by('-created_at')
 
         # Get 15-day range
         start_date = today - timedelta(days=14)
@@ -513,18 +517,20 @@ class SpanishTodaysMealAPIView(APIView):
             total_calories=Sum('recipe__calories'),
             total_protein=Sum('recipe__protein'),
             total_fat=Sum('recipe__fat'),
+            total_carbs=Sum('recipe__carbs'),
         )
 
         completed_nutrients = meal_entries_15_days.filter(completed=True).aggregate(
             completed_calories=Sum('recipe__calories'),
             completed_protein=Sum('recipe__protein'),
             completed_fat=Sum('recipe__fat'),
+            completed_carbs=Sum('recipe__carbs'),
         )
 
         def safe(val): return float(val) if val is not None else 0.0
 
         # Serialize today's entries
-        serializer = MealEntryWithFullRecipeSpanishSerializer(today_meal_entries, many=True)
+        serializer = MealEntryWithFullRecipeSpanishSerializer(today_meal_entries, many=True,context={'request': request})
         data = serializer.data
 
         # Predefined meal_type translation
@@ -551,11 +557,13 @@ class SpanishTodaysMealAPIView(APIView):
                     "calories": safe(total_nutrients["total_calories"]),
                     "protein": safe(total_nutrients["total_protein"]),
                     "fat": safe(total_nutrients["total_fat"]),
+                    "carbs": safe(total_nutrients["total_carbs"]),
                 },
                 "15_day_completed": {
                     "calories": safe(completed_nutrients["completed_calories"]),
                     "protein": safe(completed_nutrients["completed_protein"]),
                     "fat": safe(completed_nutrients["completed_fat"]),
+                    "carbs": safe(completed_nutrients["completed_carbs"]),
                 }
             }
         }, status=status.HTTP_200_OK)

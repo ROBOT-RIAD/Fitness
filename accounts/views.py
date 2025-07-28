@@ -12,22 +12,33 @@ from rest_framework.views import APIView
 from django.core.mail import send_mail
 from django.conf import settings
 from AiChat.models import HealthProfile
+from subscription.models import Subscription
+from django.utils.timezone import now
+from datetime import date
+from django.utils.dateformat import DateFormat
+from dateutil.relativedelta import relativedelta
+from django.db.models.functions import TruncMonth
+from django.views.decorators.csrf import csrf_exempt
+from subscription.models import Subscription
 #$swagger
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework.parsers import MultiPartParser, FormParser,JSONParser
 from rest_framework.generics import DestroyAPIView
+from subscription.decorators import subscription_required
 
 #jwt
 from rest_framework.permissions import AllowAny,IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView,TokenRefreshView
 from .permissions import IsSelfOrAdminDeletingUser
+from django.db.models import Sum, Count
 #openai
 import openai
 openai.api_key = settings.OPENAI_API_KEY
 import json
 import re
+from django.db.models.functions import TruncDay
 
 CHOICE_MAPPINGS = {
     'gender': {
@@ -127,9 +138,6 @@ CHOICE_MAPPINGS = {
     },
 }
 
-
-
-
 # Create your views here.
 
 class RegisterApiView(CreateAPIView):
@@ -137,7 +145,7 @@ class RegisterApiView(CreateAPIView):
     serializer_class = RegisterSerializer
     permission_classes = [AllowAny]
     @swagger_auto_schema(tags=["Authentication"])
-
+    @csrf_exempt
     def post(self, request, *args, **kwargs):
         try:
             serializer = self.get_serializer(data=request.data)
@@ -161,10 +169,21 @@ class RegisterApiView(CreateAPIView):
 
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
+
+# @subscription_required        
 class LoginAPIView(TokenObtainPairView):
     permission_classes = [AllowAny]
     serializer_class = CustomTokenObtainPairSerializer
+
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
+    #     # Apply the decorator to all view methods
+    #     for method_name in ['get', 'post', 'put', 'delete']:
+    #         if hasattr(self, method_name):
+    #             method = getattr(self, method_name)
+    #             setattr(self, method_name, subscription_required(method))
+
+
     @swagger_auto_schema(tags=["Authentication"])
     def post(self, request, *args, **kwargs):
         try:
@@ -642,4 +661,232 @@ class DeleteUserView(DestroyAPIView):
             {"detail": "User deleted successfully."},
             status=status.HTTP_200_OK
         )
-        
+
+
+class AdminDashboardStatsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_description="Retrieve all users with their profile data (excluding the current admin and superusers).",
+        tags=['admin']
+    )
+    def get(self, request):
+        # Stats
+        total_users = User.objects.filter(is_superuser=False).exclude(role="admin").count()
+        total_revenue = Subscription.objects.aggregate(total=Sum('price'))['total'] or 0
+        total_active_subscriptions = Subscription.objects.filter(is_active=True).count()
+
+        response_data = {
+            "stats": {
+                "total_users": total_users,
+                "total_revenue": float(total_revenue),
+                "total_active_subscriptions": total_active_subscriptions
+            }
+        }
+
+        return Response(response_data)
+    
+
+class UserMonthlyStatsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_description="Get monthly stats: new users joined and cumulative total per month.",
+        tags=['admin']
+    )
+    def get(self, request):
+        today = now().date()
+
+        # Start from January of current year
+        start_month = date(today.year, 1, 1)
+        current_month = today.replace(day=1)
+
+        # Step 1: Build months for last year and this year
+        all_months_current_year = []
+        all_months_last_year = []
+        month_cursor = start_month - relativedelta(years=1)  # Start from January of last year
+        while month_cursor <= current_month:
+            if month_cursor.year == today.year:
+                all_months_current_year.append(month_cursor)
+            else:
+                all_months_last_year.append(month_cursor)
+            month_cursor += relativedelta(months=1)
+
+        # Step 2: Query actual user counts for both years
+        raw_data = (
+            User.objects
+            .annotate(month=TruncMonth('date_joined'))
+            .values('month')
+            .annotate(new_users=Count('id'))
+            .filter(
+                date_joined__gte=date(today.year - 1, 1, 1),  # From January last year
+                date_joined__lte=today  # Up to today
+            )
+            .order_by('month')
+        )
+        raw_dict = {item['month'].date(): item['new_users'] for item in raw_data}
+
+        # Step 3: Build chart data for both last year and current year
+        this_year_data = []
+        last_year_data = []
+        cumulative_this_year = 0
+        cumulative_last_year = 0
+
+        # Build data for current year
+        for month in all_months_current_year:
+            new_users = raw_dict.get(month, 0)
+            cumulative_this_year += new_users
+            formatted_month = DateFormat(month).format('M-Y')  # Jan-2025
+            this_year_data.append({
+                'month': formatted_month,
+                'new_users': new_users,
+                'total_users': cumulative_this_year
+            })
+
+        # Build data for last year
+        for month in all_months_last_year:
+            new_users = raw_dict.get(month, 0)
+            cumulative_last_year += new_users
+            formatted_month = DateFormat(month).format('M-Y')  # Jan-2024
+            last_year_data.append({
+                'month': formatted_month,
+                'new_users': new_users,
+                'total_users': cumulative_last_year
+            })
+
+        #month 
+        current_month_start = today.replace(day=1)
+        all_days_current_month = []
+        for day in range(1, today.day + 1):
+            all_days_current_month.append(today.replace(day=day))
+
+        raw_current_month_data = (
+            User.objects
+            .annotate(day=TruncDay('date_joined'))
+            .values('day')
+            .annotate(new_users=Count('id'))
+            .filter(
+                date_joined__gte=current_month_start,  # From the first day of current month
+                date_joined__lte=today  # Up to today
+            )
+            .order_by('day')
+        )
+        current_month_dict = {item['day'].date(): item['new_users'] for item in raw_current_month_data}
+
+        daily_user_data = []
+        for day in all_days_current_month:
+            new_users = current_month_dict.get(day, 0)
+            formatted_day = DateFormat(day).format('d-M-Y')  # 27-Jul-2025
+            daily_user_data.append({
+                'day': formatted_day,
+                'new_users': new_users
+            })
+
+        # Structure the final response
+        return Response({
+            "this_year": this_year_data,
+            "last_year": last_year_data,
+            "current_month": daily_user_data
+        })
+
+class SubscriptionMonthlyStatsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_description="Get monthly subscription revenue: new subscriptions and cumulative total per month.",
+        tags=['admin']
+    )
+    def get(self, request):
+        today = now().date()
+
+        # Start from January of current year
+        start_month = date(today.year, 1, 1)
+        current_month = today.replace(day=1)
+
+        # Step 1: Build months for last year and this year
+        all_months_current_year = []
+        all_months_last_year = []
+        month_cursor = start_month - relativedelta(years=1)  # Start from January of last year
+        while month_cursor <= current_month:
+            if month_cursor.year == today.year:
+                all_months_current_year.append(month_cursor)
+            else:
+                all_months_last_year.append(month_cursor)
+            month_cursor += relativedelta(months=1)
+
+        # Step 2: Query actual subscription data for both years
+        raw_data = (
+            Subscription.objects
+            .annotate(month=TruncMonth('start_date'))
+            .values('month')
+            .annotate(total_revenue=Sum('price'))
+            .filter(
+                start_date__gte=date(today.year - 1, 1, 1),  # From January last year
+                start_date__lte=today  # Up to today
+            )
+            .order_by('month')
+        )
+        raw_dict = {item['month'].date(): item['total_revenue'] for item in raw_data}
+
+        # Step 3: Build chart data for both last year and current year
+        this_year_data = []
+        last_year_data = []
+        cumulative_this_year = 0
+        cumulative_last_year = 0
+
+        # Build data for current year
+        for month in all_months_current_year:
+            total_revenue = raw_dict.get(month, 0)
+            cumulative_this_year += total_revenue
+            formatted_month = DateFormat(month).format('M-Y')  # Jan-2025
+            this_year_data.append({
+                'month': formatted_month,
+                'total_revenue': total_revenue,
+                'cumulative_revenue': cumulative_this_year
+            })
+
+        # Build data for last year
+        for month in all_months_last_year:
+            total_revenue = raw_dict.get(month, 0)
+            cumulative_last_year += total_revenue
+            formatted_month = DateFormat(month).format('M-Y')  # Jan-2024
+            last_year_data.append({
+                'month': formatted_month,
+                'total_revenue': total_revenue,
+                'cumulative_revenue': cumulative_last_year
+            })
+
+        # Collect current month's daily revenue data
+        current_month_start = today.replace(day=1)
+        all_days_current_month = []
+        for day in range(1, today.day + 1):
+            all_days_current_month.append(today.replace(day=day))
+
+        raw_current_month_data = (
+            Subscription.objects
+            .annotate(day=TruncDay('start_date'))
+            .values('day')
+            .annotate(daily_revenue=Sum('price'))
+            .filter(
+                start_date__gte=current_month_start,  # From the first day of current month
+                start_date__lte=today  # Up to today
+            )
+            .order_by('day')
+        )
+        current_month_dict = {item['day'].date(): item['daily_revenue'] for item in raw_current_month_data}
+
+        daily_revenue_data = []
+        for day in all_days_current_month:
+            daily_revenue = current_month_dict.get(day, 0)
+            formatted_day = DateFormat(day).format('d-M-Y')  # 27-Jul-2025
+            daily_revenue_data.append({
+                'day': formatted_day,
+                'daily_revenue': daily_revenue
+            })
+
+        # Structure the final response
+        return Response({
+            "this_year": this_year_data,
+            "last_year": last_year_data,
+            "current_month": daily_revenue_data
+        })

@@ -92,10 +92,10 @@ class FitnessProfileCreateView(APIView):
         request_triceps = float(request.data.get('triceps'))
 
         weight_change = request_weight - profile_weight
-        abdominal_change = request_abdominal - profile_abdominal
-        sacrolic_change =  request_sacroiliac - profile_sacroiliac
-        subscapularis_change = request_subscapularis - profile_subscapularis
-        triceps_change = request_triceps - profile_triceps
+        abdominal_change = ((request_abdominal - profile_abdominal)/profile_abdominal)*100
+        sacrolic_change =  ((request_sacroiliac - profile_sacroiliac)/profile_sacroiliac)*100
+        subscapularis_change = ((request_subscapularis - profile_subscapularis)/profile_subscapularis)*100
+        triceps_change = ((request_triceps - profile_triceps)/profile_triceps)*100
 
         weight_increase = True if request_weight >= profile_weight else False
         abdominal_increase =True if request_abdominal >= profile_abdominal else False
@@ -152,9 +152,6 @@ class FitnessProfileCreateView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-
 
 
 
