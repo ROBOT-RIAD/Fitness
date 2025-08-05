@@ -23,7 +23,9 @@ class SingletonModelAdmin(admin.ModelAdmin):
             from django.shortcuts import redirect
             return redirect(reverse(f'admin:{self.model._meta.app_label}_{self.model._meta.model_name}_change', args=(obj.id,)))
         return super().changelist_view(request, extra_context)
-    
+
+
+
 
 @admin.register(TermsAndConditions)
 class TermsAndConditionsAdmin(admin.ModelAdmin):
@@ -34,6 +36,8 @@ class TermsAndConditionsAdmin(admin.ModelAdmin):
     short_text.short_description = "Terms & Conditions"
 
 
+
+
 @admin.register(PrivacyPolicy)
 class PrivacyPolicyAdmin(admin.ModelAdmin):
     list_display = ('short_text',)
@@ -41,6 +45,7 @@ class PrivacyPolicyAdmin(admin.ModelAdmin):
     def short_text(self, obj):
         return obj.text[:75] + "..." if len(obj.text) > 75 else obj.text
     short_text.short_description = "Privacy Policy"
+
 
 
 

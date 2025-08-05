@@ -10,13 +10,13 @@ class TermsAndConditionsSerializer(serializers.ModelSerializer):
         fields = ['id', 'text']
 
 
+
 class PrivacyPolicySerializer(serializers.ModelSerializer):
     class Meta:
         model = PrivacyPolicy
         fields = ['id', 'text']
 
     
-
 
 
 class EmailSerializer(serializers.ModelSerializer):

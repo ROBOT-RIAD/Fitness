@@ -27,6 +27,8 @@ class RegisterSerializer(serializers.ModelSerializer):
         return user
     
 
+
+
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
@@ -67,7 +69,20 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['email'] = user.email
         token['role'] = user.role
         return token
-    
+
+
+
+
+class ExtendedFileField(serializers.FileField):
+    def to_representation(self, value):
+        if value:
+            request = self.context.get('request')
+            url = getattr(value, 'url', value)
+            if request is not None:
+                return request.build_absolute_uri(url)
+            return url
+        return None
+
 
 class ExtendedFileField(serializers.FileField):
     def to_representation(self, value):
@@ -80,15 +95,6 @@ class ExtendedFileField(serializers.FileField):
         return None
 
 
-class ExtendedFileField(serializers.FileField):
-    def to_representation(self, value):
-        if value:
-            request = self.context.get('request')
-            url = getattr(value, 'url', value)
-            if request is not None:
-                return request.build_absolute_uri(url)
-            return url
-        return None
 
 
 class ProfileSerializer(serializers.ModelSerializer):
@@ -114,7 +120,9 @@ class ProfileSerializer(serializers.ModelSerializer):
             setattr(instance, attr, value)
         instance.save()
         return instance
-    
+
+
+
 
 class ProfileSpanishSerializer(serializers.ModelSerializer):
     image = ExtendedFileField(required=False)
@@ -140,6 +148,8 @@ class ProfileSpanishSerializer(serializers.ModelSerializer):
         return instance
     
 
+
+
 class SendOTPSerializer(serializers.Serializer):
     email = serializers.EmailField()
 
@@ -149,9 +159,13 @@ class SendOTPSerializer(serializers.Serializer):
         return value
     
 
+
+
 class VerifyOTPSerializer(serializers.Serializer):
     email = serializers.EmailField()
     otp = serializers.CharField(max_length=4)
+
+
 
 
 class ResetPasswordSerializer(serializers.Serializer):
@@ -162,6 +176,8 @@ class ResetPasswordSerializer(serializers.Serializer):
         if attrs['new_password'] != attrs['confirm_password']:
             raise serializers.ValidationError({"confirm_password": "Passwords do not match."})
         return attrs
+
+
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -177,3 +193,5 @@ class UserSerializer(serializers.ModelSerializer):
             'date_joined',
         ]
         read_only_fields = ['id', 'date_joined']
+
+        

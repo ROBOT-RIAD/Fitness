@@ -19,6 +19,8 @@ router.register(r'recipes', RecipeAdminViewSet, basename='recipe')
 router.register(r'recipes-spanish', RecipeSpanishAdminViewSet, basename='recipe-spanish')
 router.register(r'workouts-spanish', WorkoutSpanishAdminViewSet, basename='workouts-spanish')
 
+
+
 urlpatterns = [
     path('', include(router.urls)),
     path('dashboard-Stats/', AdminDashboardStatsView.as_view(), name='dashboard-Stats'),

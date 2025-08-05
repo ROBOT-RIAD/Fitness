@@ -8,11 +8,15 @@ class MealPlanAdmin(admin.ModelAdmin):
     search_fields = ('meal_plan_name', 'user__email', 'tags')
 
 
+
+
 @admin.register(DailyMeal)
 class DailyMealAdmin(admin.ModelAdmin):
     list_display = ('meal_plan', 'date')
     list_filter = ('date',)
     search_fields = ('meal_plan__meal_plan_name', 'meal_plan__user__email')
+
+
 
 
 @admin.register(MealEntry)

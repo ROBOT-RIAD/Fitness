@@ -10,16 +10,22 @@ class ProfileInfoSerializer(serializers.ModelSerializer):
         fields = ['id', 'interested_workout', 'fitness_level', 'dietary_preferences', 'weight']
 
 
+
+
 class MealPlanInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = MealPlan
         fields = ['id', 'meal_plan_name', 'tags', 'start_date', 'end_date', 'is_completed', 'is_cancelled']
 
 
+
+
 class WorkoutPlanInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = WorkoutPlan
         fields = ['id', 'workout_plan_name', 'tags', 'start_date', 'end_date', 'is_completed', 'is_cancelled']
+
+
 
 
 class UserFullInfoSerializer(serializers.Serializer):

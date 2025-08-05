@@ -26,6 +26,8 @@ class WorkoutPlan(models.Model):
             self.save()
     
 
+
+
 class DailyWorkout(models.Model):
     workout_plan = models.ForeignKey(WorkoutPlan, on_delete=models.CASCADE, related_name='daily_workouts')
     date = models.DateField()
@@ -37,6 +39,8 @@ class DailyWorkout(models.Model):
 
     def __str__(self):
         return f"{self.title} on {self.date} for {self.workout_plan.user.email}"
+
+
 
 
 class WorkoutEntry(models.Model):

@@ -18,7 +18,7 @@ def build_meal_plan(profile, recipes_qs, days=15):
         "fat": float(r.fat),
         "type": r.recipe_type,
         "for":  r.for_time,
-        "tag":  r.tag,
+        "ingredients": r.ingredients,
     } for r in recipes_qs]
 
     fitness_goals = get_display_list(profile.fitness_goals, FITNESS_GOALS)
@@ -34,7 +34,8 @@ def build_meal_plan(profile, recipes_qs, days=15):
         "medical_conditions":  profile.medical_conditions,
         "allergies":           profile.allergies,
         "fitness_goals":       profile.fitness_goals,
-        "lifestyle_habits":    profile.lifestyle_habits,
+        # "lifestyle_habits":    profile.lifestyle_habits,
+     
     }
 
     # Map lifestyle habit to number of meals per day
@@ -68,6 +69,11 @@ def build_meal_plan(profile, recipes_qs, days=15):
     meal_json = ",\n        ".join([
     f'{{"meal_type": "{meal}", "recipe_uid": "abc123", "eating_time": "08:00"}}' for meal in selected_meals
 ])
+    # meal_json = ",\n        ".join([  # Include grams as "grams" for each meal
+    #     f'{{"meal_type": "{meal}", "recipe_uid": "abc123", "eating_time": "08:00", "grams": "300", '
+    #     f'"ingredients_en": "Tomato (100g), Lettuce (50g)", "ingredients_es": "Tomate (100g), Lechuga (50g)"}}' 
+    #     for meal in selected_meals
+    # ])
 
     start_date = date.today()
     date_list = [(start_date + timedelta(days=i)).isoformat() for i in range(days)]
@@ -89,6 +95,8 @@ Generate a {days}-day meal plan using the provided recipes and user profile.
 - Do NOT return any day that skips any of those three meals.
 - ✅ Each meal entry MUST also include an `eating_time` in 24-hour format (HH:MM), appropriate to the meal type.
 - ✅ Each meal entry MUST also include the grams of food the user should eat (e.g., "grams": "300").
+- ✅ Each meal entry MUST include the ingredients in both English and Spanish in the format:
+  "ingredients_en": "ingredient_name (quantity)", "ingredients_es": "ingredient_name (quantity)" separated by commas.
 
 ✅ Output format (MUST be valid JSON):
 {{
@@ -113,7 +121,7 @@ Available recipes:
 """
 
     chat = openai.ChatCompletion.create(
-        model="gpt-4o",
+        model="gpt-4.1",
         response_format={"type": "json_object"},
         messages=[
             {"role": "system", "content": "You are a helpful meal-plan assistant."},
@@ -128,3 +136,7 @@ Available recipes:
         "tags": response_json.get("tags", ""),
         "days": response_json["days"]
     }
+
+
+
+

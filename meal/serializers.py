@@ -8,9 +8,15 @@ class MealEntryWriteSerializer(serializers.Serializer):
     meal_type     = serializers.CharField()
     recipe_uid    = serializers.CharField(source='recipe.unique_id')
 
+
+
+
 class DailyMealWriteSerializer(serializers.Serializer):
     date          = serializers.DateField()
     meals         = MealEntryWriteSerializer(many=True)
+
+
+
 
 class MealPlanWriteSerializer(serializers.Serializer):
     meal_plan_name = serializers.CharField(required=False, default='15‑Day AI Plan')
@@ -18,10 +24,14 @@ class MealPlanWriteSerializer(serializers.Serializer):
     daily_meals    = DailyMealWriteSerializer(many=True)
 
 
+
+
 class DaywiseRecipeMinimalSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = ['image', 'calories']
+
+
 
 
 class DaywiseMealEntrySerializer(serializers.ModelSerializer):
@@ -32,6 +42,8 @@ class DaywiseMealEntrySerializer(serializers.ModelSerializer):
         fields = ['meal_type', 'recipe']
 
 
+
+
 class DaywiseDailyMealSerializer(serializers.ModelSerializer):
     meals = DaywiseMealEntrySerializer(many=True)
 
@@ -40,10 +52,14 @@ class DaywiseDailyMealSerializer(serializers.ModelSerializer):
         fields = ['id','date', 'meals']
 
 
+
+
 class FullRecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = '__all__'
+
+
 
 
 class MealEntryWithFullRecipeSerializer(serializers.ModelSerializer):
@@ -51,7 +67,9 @@ class MealEntryWithFullRecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MealEntry
-        fields = ['grams','eating_time','meal_type', 'recipe','completed','id']
+        fields = ['ingredients_en','grams','eating_time','meal_type', 'recipe','completed','id']
+
+
 
 
 class RecipeSpanishSerializer(serializers.ModelSerializer):
@@ -68,6 +86,8 @@ class RecipeSpanishSerializer(serializers.ModelSerializer):
         return None
 
 
+
+
 MEAL_TYPE_TRANSLATIONS = {
     "Breakfast": "Desayuno",
     "Snack": "Merienda",
@@ -80,12 +100,15 @@ MEAL_TYPE_TRANSLATIONS = {
     "Late Snack": "Merienda nocturna"
 }
 
+
+
+
 class MealEntryWithFullRecipeSpanishSerializer(serializers.ModelSerializer):
     recipe = serializers.SerializerMethodField()
 
     class Meta:
         model = MealEntry
-        fields = ['grams','eating_time','meal_type', 'recipe','completed','id']
+        fields = ['ingredients_es','grams','eating_time','meal_type', 'recipe','completed','id']
     
     def get_recipe(self, obj):
         from recipe.models import RecipeSpanish

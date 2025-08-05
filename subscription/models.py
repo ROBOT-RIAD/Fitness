@@ -22,6 +22,7 @@ class Package(models.Model):
     
 
 
+
 class Subscription(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='subscriptions')
     stripe_customer_id = models.CharField(max_length=255)
@@ -47,7 +48,6 @@ class Subscription(models.Model):
         # You can define the logic here, for example:
         return self.is_active
     
-
 
 
 

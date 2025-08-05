@@ -14,7 +14,7 @@ class FitnessProfile(models.Model):
     triceps = models.FloatField(null=True, blank=True)
     feeling = models.CharField(max_length=100, null=True, blank=True)  # A short description, like "Good", "Tired", etc.
     total_meal = models.IntegerField(null=True, blank=True)  # Number of meals consumed per day
-    workout_consistency = models.IntegerField(null=True, blank=True)  # Rating, e.g., 1-5 scale
+    workout_consistency = models.CharField(max_length=100, null=True, blank=True)  # Rating, e.g., 1-5 scale
     energy_level = models.IntegerField(null=True, blank=True)  # Rating, e.g., 1-10 scale
     injuries_pain = models.CharField(max_length=255, null=True, blank=True)  # Describes the injuries/pain level (optional)
 
@@ -32,6 +32,7 @@ class FitnessProfile(models.Model):
     class Meta:
         verbose_name = 'Fitness Profile'
         verbose_name_plural = 'Fitness Profiles'
+
 
 
 

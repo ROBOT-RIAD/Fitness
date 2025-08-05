@@ -138,8 +138,10 @@ CHOICE_MAPPINGS = {
     },
 }
 
-# Create your views here.
 
+
+
+# Create your views here.
 class RegisterApiView(CreateAPIView):
     queryset = User.objects.all()
     serializer_class = RegisterSerializer
@@ -170,6 +172,9 @@ class RegisterApiView(CreateAPIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+
+
 # @subscription_required        
 class LoginAPIView(TokenObtainPairView):
     permission_classes = [AllowAny]
@@ -193,6 +198,9 @@ class LoginAPIView(TokenObtainPairView):
         except Exception as e :
             return Response({"error": str(e)}, status= status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+
+
 class CustomTokenRefreshView(TokenRefreshView):
     permission_classes = [AllowAny]
 
@@ -202,6 +210,9 @@ class CustomTokenRefreshView(TokenRefreshView):
             return super().post(request, *args, **kwargs)
         except Exception as e :
             return Response({"error":str(e)} , status= status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
 
 class ProfileViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
@@ -512,6 +523,9 @@ class ProfileViewSet(viewsets.ViewSet):
         except Exception as e:
             return Response({"error": "OpenAI failed", "detail": str(e)}, status=500)
 
+
+
+
 class SendOTPView(APIView):
     permission_classes = [AllowAny]
  
@@ -554,6 +568,9 @@ class SendOTPView(APIView):
         except Exception as e:
             return Response({"error": "Failed to send OTP."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+
+
 class VerifyOTPView(APIView):
     permission_classes = [AllowAny]
 
@@ -587,7 +604,10 @@ class VerifyOTPView(APIView):
         otp_record.save()
 
         return Response({"message": "OTP verified successfully."}, status=status.HTTP_200_OK)
-    
+
+
+
+
 class ResetPasswordView(APIView):
     permission_classes = [AllowAny] 
 
@@ -636,6 +656,9 @@ class ResetPasswordView(APIView):
             return Response({"error" : e}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+
+
+
 class DeleteUserView(DestroyAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -663,6 +686,8 @@ class DeleteUserView(DestroyAPIView):
         )
 
 
+
+
 class AdminDashboardStatsView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -686,6 +711,8 @@ class AdminDashboardStatsView(APIView):
 
         return Response(response_data)
     
+
+
 
 class UserMonthlyStatsView(APIView):
     permission_classes = [IsAuthenticated]
@@ -789,6 +816,9 @@ class UserMonthlyStatsView(APIView):
             "current_month": daily_user_data
         })
 
+
+
+
 class SubscriptionMonthlyStatsView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -890,3 +920,5 @@ class SubscriptionMonthlyStatsView(APIView):
             "last_year": last_year_data,
             "current_month": daily_revenue_data
         })
+    
+    

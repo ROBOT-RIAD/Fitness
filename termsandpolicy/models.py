@@ -11,6 +11,7 @@ class TermsAndConditions(models.Model):
 
 
 
+
 class PrivacyPolicy(models.Model):
     text = models.TextField()
 

@@ -17,6 +17,7 @@ from django.db.models import Sum,Q
 from rest_framework.parsers import JSONParser
 
 
+
 MEAL_TYPE_TRANSLATIONS = {
     "Breakfast": "Desayuno",
     "Snack": "Merienda",
@@ -28,6 +29,7 @@ MEAL_TYPE_TRANSLATIONS = {
     "Post-Dinner": "Después de la cena",
     "Late Snack": "Merienda nocturna"
 }
+
 
 
 
@@ -101,6 +103,7 @@ class GenerateMealPlanView(APIView):
                 date=day["date"]
             )
             for m in day["meals"]:
+                print(m)
                 recipe = uid_cache.get(m["recipe_uid"])
                 MealEntry.objects.create(
                     daily_meal=daily,
@@ -108,6 +111,8 @@ class GenerateMealPlanView(APIView):
                     recipe=recipe,  # can be None if not found
                     eating_time=datetime.datetime.strptime(m["eating_time"], "%H:%M").time() if "eating_time" in m else None,
                     grams=m["grams"],
+                    ingredients_en=m["ingredients_en"],
+                    ingredients_es=m["ingredients_es"],
                 )
 
         # 7. Return response
@@ -117,6 +122,7 @@ class GenerateMealPlanView(APIView):
             "meal_plan_name": meal_plan_name,
             "tags": tags
         }, status=status.HTTP_201_CREATED)
+
 
 
 
@@ -179,7 +185,9 @@ class DaywiseMealInfoAPIView(APIView):
         },
         "days": serializer.data
     })
-    
+
+
+
 
 class SpanishDaywiseMealInfoAPIView(APIView):
     permission_classes = [IsAuthenticated]
@@ -313,6 +321,8 @@ class DailyMealDetailAPIView(APIView):
         }, status=status.HTTP_200_OK)
 
 
+
+
 class SpanishDailyMealDetailAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -382,6 +392,8 @@ class SpanishDailyMealDetailAPIView(APIView):
             },
             "meals": data,
         }, status=status.HTTP_200_OK)
+
+
 
 
 class TodaysMealAPIView(APIView):
@@ -467,6 +479,8 @@ class TodaysMealAPIView(APIView):
             }
         }, status=status.HTTP_200_OK)
     
+
+
 
 class SpanishTodaysMealAPIView(APIView):
     permission_classes = [IsAuthenticated]
@@ -569,6 +583,8 @@ class SpanishTodaysMealAPIView(APIView):
         }, status=status.HTTP_200_OK)
 
 
+
+
 class UpdateMealCompletionStatusAPIView(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes = [JSONParser]
@@ -632,7 +648,4 @@ class UpdateMealCompletionStatusAPIView(APIView):
             "completed": meal_entry.completed,
             "message": "Meal completion status updated successfully."
         }, status=status.HTTP_200_OK)  
-
-
-
 

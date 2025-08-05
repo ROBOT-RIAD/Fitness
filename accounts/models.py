@@ -14,6 +14,8 @@ class User(AbstractUser):
     REQUIRED_FIELDS = ['username']
 
 
+
+
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     image = models.ImageField(upload_to='media/user_images/', null=True, blank=True)

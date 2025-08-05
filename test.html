@@ -1,55 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Health Chatbot Streaming Test</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    max-width: 600px;
-    margin: 30px auto;
-  }
-  #chatbox {
-    border: 1px solid #ccc;
-    padding: 10px;
-    height: 400px;
-    overflow-y: auto;
-    white-space: pre-wrap;
-    background: #f9f9f9;
-  }
-  #inputForm {
-    margin-top: 15px;
-    display: flex;
-  }
-  #messageInput {
-    flex: 1;
-    padding: 8px;
-    font-size: 1rem;
-  }
-  #sendBtn {
-    padding: 8px 16px;
-    font-size: 1rem;
-  }
-  .user {
-    color: blue;
-    margin-top: 10px;
-  }
-  .bot {
-    color: green;
-    margin-top: 10px;
-    white-space: pre-wrap;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Health & Fitness Chatbot</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 30px auto;
+      padding: 0 15px;
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+    #chatbox {
+      border: 1px solid #ccc;
+      padding: 15px;
+      height: 500px;
+      overflow-y: auto;
+      background: #f9f9f9;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    #inputForm {
+      margin-top: 15px;
+      display: flex;
+      gap: 10px;
+    }
+    #messageInput {
+      flex: 1;
+      padding: 10px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    #sendBtn {
+      padding: 10px 20px;
+      font-size: 1rem;
+      background: #28a745;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    #sendBtn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    .user {
+      color: #007bff;
+      margin: 10px 0;
+      font-weight: bold;
+    }
+    .bot {
+      color: #333;
+      margin: 10px 0;
+      white-space: pre-wrap;
+      background: #fff;
+      padding: 10px;
+      border-radius: 4px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    .error {
+      color: #dc3545;
+      font-style: italic;
+    }
+    .loading {
+      color: #6c757d;
+      font-style: italic;
+    }
+  </style>
 </head>
 <body>
 
-<h2>Health & Fitness Chatbot (Streaming Response)</h2>
+<h2>Health & Fitness Chatbot</h2>
 
 <div id="chatbox"></div>
 
 <form id="inputForm">
-  <input type="text" id="messageInput" placeholder="Type your message..." autocomplete="off" required />
+  <input type="text" id="messageInput" placeholder="Ask about today's meal plan..." autocomplete="off" required />
   <button type="submit" id="sendBtn">Send</button>
 </form>
 
@@ -57,28 +88,43 @@
   const chatbox = document.getElementById('chatbox');
   const form = document.getElementById('inputForm');
   const input = document.getElementById('messageInput');
+  const sendBtn = document.getElementById('sendBtn');
 
-  // Generate a unique session ID for each page load
-  const sessionId = Date.now().toString();
+  // Load or generate session ID
+  let sessionId = localStorage.getItem('chatSessionId');
+  if (!sessionId) {
+    sessionId = Date.now().toString();
+    localStorage.setItem('chatSessionId', sessionId);
+  }
+
+  // Retrieve authentication token (JWT)
+  const authToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzU0Mzk1MTIzLCJpYXQiOjE3NTQzODA3MjMsImp0aSI6IjNiODYyMGE3ZmM4MDQzNWI5OWVjNjVhZmRkZjkxN2RhIiwidXNlcl9pZCI6NzYsImlkIjo3NiwiZW1haWwiOiJ0ZXN0QGdtYWlsLmNvbSIsInJvbGUiOiJ1c2VyIn0.wZLhvpXbrhDLVcTjmQaoyXzM6DpCZwonorChC9FJEaA';
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const message = input.value.trim();
     if (!message) return;
 
-    appendMessage('user', message);
+    appendMessage('user', `You: ${message}`);
     input.value = '';
     input.disabled = true;
-    document.getElementById('sendBtn').disabled = true;
+    sendBtn.disabled = true;
 
-    const placeholder = appendMessage('bot', '...');
+    const placeholder = appendMessage('bot', 'Loading...');
 
     try {
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+
+      // Add JWT Bearer token if available
+      if (authToken) {
+        headers['Authorization'] = `Bearer ${authToken}`;
+      }
+
       const response = await fetch('http://10.10.13.26:9001/chat/Ai/', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: headers,
         body: JSON.stringify({
           message: message,
           session_id: sessionId,
@@ -86,7 +132,7 @@
       });
 
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
       const reader = response.body.getReader();
@@ -101,11 +147,17 @@
         updateBotMessage(placeholder, botMessage);
       }
 
+      // Check if the response contains an error
+      if (botMessage.startsWith('[ERROR]')) {
+        placeholder.classList.add('error');
+      }
+
     } catch (error) {
-      updateBotMessage(placeholder, '[Error] ' + error.message);
+      updateBotMessage(placeholder, `[Error] Failed to fetch response: ${error.message}. Please check your connection or login status.`);
+      placeholder.classList.add('error');
     } finally {
       input.disabled = false;
-      document.getElementById('sendBtn').disabled = false;
+      sendBtn.disabled = false;
       input.focus();
     }
   });
@@ -116,13 +168,17 @@
     msgElem.textContent = text;
     chatbox.appendChild(msgElem);
     chatbox.scrollTop = chatbox.scrollHeight;
-    return msgElem; // Return the created element for updates
+    return msgElem;
   }
 
   function updateBotMessage(element, text) {
-    element.textContent = text;
+    element.textContent = `Bot: ${text}`;
+    element.classList.remove('loading');
     chatbox.scrollTop = chatbox.scrollHeight;
   }
+
+  // Display welcome message
+  appendMessage('bot', 'Welcome to the Health & Fitness Chatbot! Ask about your meal plan for today (August 2, 2025) or any health-related question.');
 </script>
 
 </body>

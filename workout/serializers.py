@@ -12,6 +12,9 @@ class ExtendedFileField(serializers.FileField):
             return url
         return None
 
+
+
+
 class WorkoutSerializer(serializers.ModelSerializer):
     image = ExtendedFileField(required=False)
     class Meta:
@@ -19,6 +22,7 @@ class WorkoutSerializer(serializers.ModelSerializer):
         fields = ['id','unique_id','workout_name','time_needed','for_body_part','workout_type','calories_burn','equipment_needed','tag','image','benefits','created_at','updated_at',]
         read_only_fields = ['id', 'created_at', 'updated_at']
         extra_kwargs = {'unique_id': {'required': False}}
+
 
 
 

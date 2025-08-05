@@ -14,6 +14,8 @@ class ExtendedFileField(serializers.FileField):
         return None
 
 
+
+
 class RecipeSerializer(serializers.ModelSerializer):
     image = ExtendedFileField(required=False)
     class Meta:
@@ -23,6 +25,8 @@ class RecipeSerializer(serializers.ModelSerializer):
         extra_kwargs = {'unique_id': {'required': False}}
 
 
+
+
 class RecipeSpanishSerializer(serializers.ModelSerializer):
     image = ExtendedFileField(required=False)
     class Meta:
@@ -30,3 +34,4 @@ class RecipeSpanishSerializer(serializers.ModelSerializer):
         fields = ['id', 'unique_id', 'image', 'recipe_name', 'recipe_type', 'tag', 'calories', 'carbs', 'protein', 'fat', 'making_time', 'time', 'ratings', 'category', 'for_time', 'ingredients', 'instructions', 'created_at', 'updated_at']
         read_only_fields = ['id', 'created_at', 'updated_at']
         extra_kwargs = {'unique_id': {'required': False}}
+

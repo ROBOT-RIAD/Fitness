@@ -22,6 +22,8 @@ class WorkoutAdmin(admin.ModelAdmin):
     readonly_fields = ('created_at', 'updated_at')
 
 
+
+
 @admin.register(WorkoutSpanish)
 class WorkoutSpanishAdmin(admin.ModelAdmin):
     list_display = (

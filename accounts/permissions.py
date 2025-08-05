@@ -11,7 +11,6 @@ class IsAdminRole(BasePermission):
 
 
 
-
 class IsUserRole(BasePermission):
     """
     Allows access only to users with user role.
@@ -29,6 +28,8 @@ class IsAdminOrUser(BasePermission):
     """
     def has_permission(self, request, view):
         return request.user.is_authenticated and getattr(request.user, 'role', None) in ['admin', 'user']
+
+
 
 
 class IsSelfOrAdminDeletingUser(BasePermission):

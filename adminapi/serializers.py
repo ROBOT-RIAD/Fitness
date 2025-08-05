@@ -2,10 +2,14 @@ from rest_framework import serializers
 from accounts.models import User
 from subscription.models import Subscription
 
+
 class SubscriptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Subscription
         fields = ['package_name']
+
+
+
 
 class ExtendedFileField(serializers.FileField):
     def to_representation(self, value):
@@ -16,6 +20,8 @@ class ExtendedFileField(serializers.FileField):
                 return request.build_absolute_uri(url)  # This converts it to a full URL
             return url
         return None
+
+
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -49,6 +55,8 @@ class UserSerializer(serializers.ModelSerializer):
         return None
     
 
+
+
 class SingleSubscriptionSerializer(serializers.ModelSerializer):
     next_billing_date = serializers.SerializerMethodField()
 
@@ -58,6 +66,8 @@ class SingleSubscriptionSerializer(serializers.ModelSerializer):
 
     def get_next_billing_date(self, obj):
         return obj.current_period_end if obj.current_period_end else None
+
+   
     
 
 class SingleUserSerializer(serializers.ModelSerializer):

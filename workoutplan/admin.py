@@ -10,6 +10,8 @@ class WorkoutPlanAdmin(admin.ModelAdmin):
     date_hierarchy = 'start_date'
 
 
+
+
 @admin.register(DailyWorkout)
 class DailyWorkoutAdmin(admin.ModelAdmin):
     list_display = ('id', 'workout_plan', 'date', 'title', 'title_spanish', 'completed')
@@ -20,6 +22,8 @@ class DailyWorkoutAdmin(admin.ModelAdmin):
     def user_email(self, obj):
         return obj.workout_plan.user.email
     user_email.short_description = 'User Email'
+
+
 
 @admin.register(WorkoutEntry)
 class WorkoutEntryAdmin(admin.ModelAdmin):

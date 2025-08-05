@@ -14,6 +14,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 # Create your views here.
 
+
 class TermsAndConditionsViewSet(ModelViewSet):
     queryset = TermsAndConditions.objects.all()
     serializer_class = TermsAndConditionsSerializer
@@ -45,6 +46,8 @@ class TermsAndConditionsViewSet(ModelViewSet):
         return super().destroy(request, *args, **kwargs)
 
 
+
+
 class PrivacyPolicyViewSet(ModelViewSet):
     queryset = PrivacyPolicy.objects.all()
     serializer_class = PrivacyPolicySerializer
@@ -74,7 +77,9 @@ class PrivacyPolicyViewSet(ModelViewSet):
     @swagger_auto_schema(tags=["terms and privacy"])
     def destroy(self, request, *args, **kwargs):
         return super().destroy(request, *args, **kwargs)
-    
+
+
+
 
 class TermsAndConditionsView(APIView):
     permission_classes = [AllowAny]  # Public access
@@ -96,6 +101,8 @@ class TermsAndConditionsView(APIView):
         return Response({"error": "Terms and Conditions not found"}, status=404)
 
 
+
+
 class PrivacyPolicyView(APIView):
     permission_classes = [AllowAny]  # Public access
 
@@ -114,6 +121,8 @@ class PrivacyPolicyView(APIView):
             serializer = PrivacyPolicySerializer(privacy_policy)
             return Response(serializer.data)
         return Response({"error": "Privacy Policy not found"}, status=404)
+    
+
     
 
 class SendEmailView(APIView):

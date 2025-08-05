@@ -55,8 +55,6 @@ class ProfileAdmin(admin.ModelAdmin):
 
 
 
-
-
 @admin.register(PasswordResetOTP)
 class PasswordResetOTPAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'otp', 'created_at', 'is_verified')
@@ -64,11 +62,6 @@ class PasswordResetOTPAdmin(admin.ModelAdmin):
     list_filter = ('is_verified', 'created_at')
 
 
-
-
-
-from django.contrib import admin
-from .models import ProfileSpanish
 
 
 @admin.register(ProfileSpanish)

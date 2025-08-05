@@ -5,12 +5,17 @@ from rest_framework.response import Response
 from meal.models import MealPlan,DailyMeal
 from workoutplan.models import WorkoutPlan,DailyWorkout
 from .models import FitnessProfile,Achievement
-from .serializers import FitnessProfileSerializer,UserAchievementSerializer
+from .serializers import FitnessProfileSerializer,UserAchievementSerializer,AchievementSerializer
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from accounts.models import Profile
 from accounts.models import User
 from django.db.models import Max
+import openai
+from django.conf import settings
+
+
+
 
 class FitnessProfileCreateView(APIView):
     permission_classes = [IsAuthenticated]
@@ -119,6 +124,7 @@ class FitnessProfileCreateView(APIView):
             'meal_plan': meal_plan.id if meal_plan else None,
             'workout_plan': workout_plan.id if workout_plan else None,
         }
+        print(data)
 
         # Validate and serialize the data
         serializer = FitnessProfileSerializer(data=data)
@@ -130,10 +136,10 @@ class FitnessProfileCreateView(APIView):
                     user=user,
                     defaults={
                         'weight_change': weight_change,
-                        'abdominal_change': abdominal_change,
-                        'sacrolic_change': sacrolic_change,
-                        'subscapularis_change': subscapularis_change,
-                        'triceps_change': triceps_change,
+                        'abdominal_change': int(abdominal_change),
+                        'sacrolic_change': int(sacrolic_change),
+                        'subscapularis_change': int(subscapularis_change),
+                        'triceps_change': int(triceps_change),
                         'weight_increase': weight_increase,
                         'abdominal_increase': abdominal_increase,
                         'sacrolic_increase': sacrolic_increase,
@@ -156,7 +162,7 @@ class FitnessProfileCreateView(APIView):
 
 
 
-class UserAchievementDetailView(APIView):
+class UserAchievementDetailView(APIView):    
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
@@ -225,3 +231,111 @@ class UserAchievementDetailView(APIView):
             'total_completed_meal_days': total_completed_meal_days,
             'weights_list': weights_list,
         }, status=status.HTTP_200_OK)
+
+
+
+
+class Aifeedback(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_summary="Get user achievement, latest meal plan, and latest workout plan",
+        operation_description="Fetch the authenticated user's achievement details, the latest completed meal plan, and the latest completed workout plan, including their progress.",
+        responses={
+            200: openapi.Response(
+                description="Successfully fetched achievement and plans",
+                schema=UserAchievementSerializer,
+            ),
+            404: openapi.Response(
+                description="Not Found: No achievement or plans found for the user",
+                examples={"application/json": {"detail": "Not found."}},
+            ),
+            400: openapi.Response(
+                description="Bad Request: Invalid or incomplete request",
+                examples={"application/json": {"detail": "Invalid request."}},
+            ),
+        },
+        tags=["User Achievement"]
+    )
+    def get(self, request, *args, **kwargs):
+        # Get the authenticated user
+        user = request.user
+
+        # Get the latest completed MealPlan
+        latest_meal_plan = MealPlan.objects.filter(user=user, is_completed=True).order_by('-end_date').first()
+
+        # Get the latest completed WorkoutPlan
+        latest_workout_plan = WorkoutPlan.objects.filter(user=user, is_completed=True).order_by('-end_date').first()
+
+        # Get the Achievement of the user
+        achievement = Achievement.objects.filter(user=user).first()
+
+        # Count total completed workout days for the latest workout plan
+        total_completed_workout_days = DailyWorkout.objects.filter(
+            workout_plan=latest_workout_plan, completed=True
+        ).count() if latest_workout_plan else 0
+
+        # Count total completed meal days for the latest meal plan
+        total_completed_meal_days = DailyMeal.objects.filter(
+            meal_plan=latest_meal_plan
+        ).filter(
+            meals__completed=True
+        ).distinct().count() if latest_meal_plan else 0
+
+        # Get fitness profile and weight data
+        fitness_profiles = FitnessProfile.objects.filter(user=user)
+        weights_list = [profile.current_weight for profile in fitness_profiles]
+
+        # Prepare the data to send in response
+        data = {
+            'total_completed_workout_days': total_completed_workout_days,
+            'total_completed_meal_days': total_completed_meal_days,
+            'weights_list': weights_list,
+        }
+        feedbacks={}
+
+        # If an achievement exists, serialize it and add it to the response data
+        if achievement:
+            achievement_serializer = AchievementSerializer(achievement)
+            data['achievement'] = achievement_serializer.data  # Add the serialized achievement data
+
+            # Generate feedback using OpenAI
+            try:
+                openai.api_key = settings.OPENAI_API_KEY
+                # Create a prompt based on the user's data
+                prompt = f"""User has completed {total_completed_workout_days} workout days and {total_completed_meal_days} meal days.
+                Their current weight list is {weights_list}. Give positive and motivational feedback in Markdown format.
+                After each sentence, add a new line (\\n).
+                for this achievement without headings.must Add emoji not use ranbow emoji. Provide feedback in both English and Spanish in the format:
+                "feedback_en": "<English Feedback>",
+                "feedback_es": "<Spanish Feedback>"
+                Please avoid adding any extra JSON formatting or tags
+                """
+
+                # Use the correct chat model endpoint
+                response = openai.ChatCompletion.create(
+                    model="gpt-4o",  # You can use gpt-3.5-turbo as well
+                    messages=[
+                        {"role": "system", "content": "You are a helpful assistant."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    max_tokens=150,
+                    temperature=0
+                )
+
+                # Get feedback from the response
+                feedback = response.choices[0].message['content'].strip()
+
+                feedback_en = feedback.split("feedback_es")[0].strip().replace('feedback_en', '').strip().strip(':')
+                feedback_es = feedback.split("feedback_es")[1].strip().replace('feedback_es', '').strip().strip(':"')
+
+                # Add the feedback to the response data
+                feedbacks['feedback_en'] = feedback_en
+                feedbacks['feedback_es'] = feedback_es
+
+            except Exception as e:
+                feedbacks['feedback_en'] = f"Error generating feedback: {str(e)}"
+                feedbacks['feedback_es'] = f"Error generating feedback: {str(e)}"
+                feedbacks['status_code'] = status.HTTP_500_INTERNAL_SERVER_ERROR
+
+        return Response(feedbacks, status=status.HTTP_200_OK)

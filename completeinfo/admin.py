@@ -1,6 +1,7 @@
 from django.contrib import admin
 from .models import FitnessProfile,Achievement
 
+
 # Customize the admin interface for FitnessProfile
 class FitnessProfileAdmin(admin.ModelAdmin):
     # Fields to display in the list view
@@ -26,6 +27,7 @@ class FitnessProfileAdmin(admin.ModelAdmin):
 
 
 
+
 class AchievementAdmin(admin.ModelAdmin):
     # Exclude non-editable fields like 'create_time', 'update_time', and 'achievement_date'
     exclude = ('create_time', 'update_time', 'achievement_date')
@@ -40,6 +42,7 @@ class AchievementAdmin(admin.ModelAdmin):
     list_display = ['user', 'weight_change', 'abdominal_change', 'sacrolic_change', 
                     'subscapularis_change', 'triceps_change', 'achievement_date']
     
+  
     
 
 # Register the FitnessProfile model with custom admin

@@ -4,6 +4,8 @@ from meal.models import MealPlan,MealEntry
 from workoutplan.models import WorkoutPlan,WorkoutEntry
 from accounts.models import User
 
+
+
 class FitnessProfileSerializer(serializers.ModelSerializer):
     meal_plan = serializers.PrimaryKeyRelatedField(queryset=MealPlan.objects.all(), required=False, allow_null=True)
     workout_plan = serializers.PrimaryKeyRelatedField(queryset=WorkoutPlan.objects.all(), required=False, allow_null=True)
@@ -23,12 +25,15 @@ class FitnessProfileSerializer(serializers.ModelSerializer):
 
 
 
+
 class AchievementSerializer(serializers.ModelSerializer):
     class Meta:
         model = Achievement
         fields = ['weight_change', 'abdominal_change', 'sacrolic_change', 'subscapularis_change', 'triceps_change',
                   'weight_increase', 'abdominal_increase', 'sacrolic_increase', 'subscapularis_increase',
                   'triceps_increase', 'achievement_date', 'create_time', 'update_time']
+
+
 
 
 # Serializer for MealPlan model, including total meals completed
@@ -43,6 +48,8 @@ class MealPlanSerializer(serializers.ModelSerializer):
         return MealEntry.objects.filter(daily_meal__meal_plan=obj, completed=True).count()
 
 
+
+
 # Serializer for WorkoutPlan model, including total workouts completed
 class WorkoutPlanSerializer(serializers.ModelSerializer):
     total_workouts_completed = serializers.SerializerMethodField()
@@ -53,6 +60,8 @@ class WorkoutPlanSerializer(serializers.ModelSerializer):
 
     def get_total_workouts_completed(self, obj):
         return WorkoutEntry.objects.filter(daily_workout__workout_plan=obj, completed=True).count()
+
+
 
 
 # Serializer for User's Achievement, Latest Meal Plan, and Latest Workout Plan
@@ -78,3 +87,11 @@ class UserAchievementSerializer(serializers.ModelSerializer):
         if latest_workout_plan:
             return WorkoutPlanSerializer(latest_workout_plan).data
         return None
+    
+
+
+
+class AchievementSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Achievement
+        fields = '__all__'

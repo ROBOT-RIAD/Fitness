@@ -80,6 +80,7 @@ class UserFullInfoAPIView(APIView):
 
 
 
+
 class UserSpanishFullInfoAPIView(APIView):
     permission_classes = [IsAuthenticated]
 

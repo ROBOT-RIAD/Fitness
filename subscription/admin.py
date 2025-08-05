@@ -8,6 +8,8 @@ class PackageAdmin(admin.ModelAdmin):
     readonly_fields = ['product_id', 'price_id']
 
 
+
+
 @admin.register(StripeEventLog)
 class StripeEventLogAdmin(admin.ModelAdmin):
     list_display = ('event_id', 'event_type', 'received_at')

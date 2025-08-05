@@ -14,6 +14,8 @@ class RecipeAdmin(admin.ModelAdmin):
     readonly_fields = ('created_at', 'updated_at')
 
 
+
+
 @admin.register(RecipeSpanish)
 class RecipeSpanishAdmin(admin.ModelAdmin):
     list_display = (

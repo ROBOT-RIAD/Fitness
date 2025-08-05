@@ -19,6 +19,8 @@ def extract_json(text):
     return {}
 
 
+
+
 def translate_to_spanish(data):
     """
     Translates values in a JSON object from English to Spanish using GPT-4o.

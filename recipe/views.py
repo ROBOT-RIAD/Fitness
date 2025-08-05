@@ -32,6 +32,8 @@ from drf_yasg import openapi
 import uuid
 
 
+
+
 def ensure_unique_id(data: dict) -> str:
     """
     Guarantee there is a unique_id in `data` and return it.
@@ -201,6 +203,8 @@ class RecipeAdminViewSet(ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+
+
 class RecipeSpanishAdminViewSet(ModelViewSet):
     queryset = RecipeSpanish.objects.all()
     serializer_class = RecipeSpanishSerializer
@@ -348,6 +352,8 @@ class RecipeSpanishAdminViewSet(ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+
+
 class SingleRecipeDetailAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -375,7 +381,7 @@ class SingleRecipeDetailAPIView(APIView):
         except Recipe.DoesNotExist:
             return Response({"detail": "Recipe not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = RecipeSerializer(recipe)
+        serializer = RecipeSerializer(recipe,context ={'request':request})
         return Response(serializer.data, status=status.HTTP_200_OK)
     
 
@@ -407,7 +413,7 @@ class SpanishSingleRecipeDetailAPIView(APIView):
         except Recipe.DoesNotExist:
             return Response({"detail": "Recipe not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = RecipeSpanishSerializer(recipe)
+        serializer = RecipeSpanishSerializer(recipe,context ={'request':request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -450,6 +456,8 @@ class RecipeListView(generics.ListAPIView):
 
         return queryset
     
+
+
 
 class SpanishRecipeListView(generics.ListAPIView):
     serializer_class = RecipeSpanishSerializer

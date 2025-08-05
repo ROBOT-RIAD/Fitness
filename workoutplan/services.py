@@ -8,6 +8,9 @@ from .utils import get_display_label, get_display_list   # same helpers you used
 
 openai.api_key = settings.OPENAI_API_KEY
 
+
+
+
 def build_workout_plan(profile, training_data, workouts_qs, days=15):
     daily_duration_limit = training_data.get("daily_duration_minutes")
     from datetime import date, timedelta
@@ -106,7 +109,7 @@ Available workouts (duration ≤ {daily_duration_limit} minutes):
 """
 
     chat = openai.ChatCompletion.create(
-        model="gpt-4o",
+        model="gpt-4.1",
         response_format={"type": "json_object"},
         messages=[
             {"role": "system", "content": "You are a helpful workout‑plan assistant."},

@@ -18,6 +18,8 @@ from drf_yasg import openapi
 import calendar
 from decimal import Decimal
 
+
+
 class GenerateWorkoutPlanView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -119,6 +121,8 @@ class GenerateWorkoutPlanView(APIView):
         }, status=status.HTTP_201_CREATED)
 
 
+
+
 class ActiveWorkoutPlanView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -215,6 +219,8 @@ class ActiveWorkoutPlanView(APIView):
         })
 
 
+
+
 class CompleteTodayWorkoutView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -278,6 +284,8 @@ class CompleteTodayWorkoutView(APIView):
         }, status=200)
 
 
+
+
 class DailyWorkoutDetailsView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -314,6 +322,8 @@ class DailyWorkoutDetailsView(APIView):
                 "total_calories_burn": total_calories
             }
         }, status=200)
+
+
 
 
 class SpanishDailyWorkoutDetailsView(APIView):
@@ -379,6 +389,8 @@ class SpanishDailyWorkoutDetailsView(APIView):
             }
         }, status=200)
     
+
+
 
 class TodayWorkoutView(APIView):
     permission_classes = [IsAuthenticated]
@@ -449,7 +461,9 @@ class TodayWorkoutView(APIView):
                 "total_completed_days": total_completed_days
             }
         })
-    
+
+
+
 
 class SpanishWorkoutEntryListView(APIView):
     @swagger_auto_schema(
@@ -517,6 +531,8 @@ class SpanishWorkoutEntryListView(APIView):
                 "total_completed_days": total_completed_days
             }
         })
+    
+
     
 
 class UpdateTodayWorkoutEntryAPIView(APIView):

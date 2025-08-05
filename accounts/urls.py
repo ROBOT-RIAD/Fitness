@@ -4,8 +4,12 @@ from .views import RegisterApiView,LoginAPIView,CustomTokenRefreshView,ProfileVi
 from subscription.views import PublicPackageListView
 from termsandpolicy.views import TermsAndConditionsView, PrivacyPolicyView,SendEmailView
 
+
+
 router = DefaultRouter()
 router.register(r'profile', ProfileViewSet, basename='profile')
+
+
 
 urlpatterns = [
     path('', include(router.urls)),

@@ -4,6 +4,7 @@ from accounts.models import User
 from recipe.models import Recipe
 # Create your models here.
 
+
 class MealPlan(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='meal_plans')
     meal_plan_name = models.CharField(max_length=255)
@@ -26,7 +27,6 @@ class MealPlan(models.Model):
 
 
 
-
 class DailyMeal(models.Model):
     meal_plan = models.ForeignKey(MealPlan, on_delete=models.CASCADE, related_name='daily_meals')
     date = models.DateField()
@@ -37,22 +37,24 @@ class DailyMeal(models.Model):
 
 
 
-
 class MealEntry(models.Model):
     daily_meal = models.ForeignKey(DailyMeal, on_delete=models.CASCADE, related_name='meals')
     meal_type = models.CharField(max_length=50)  # Just a plain string now
-    recipe = models.ForeignKey(Recipe,to_field='unique_id',on_delete=models.SET_NULL,null=True,blank=True)
+    recipe = models.ForeignKey(Recipe, to_field='unique_id', on_delete=models.SET_NULL, null=True, blank=True)
     completed = models.BooleanField(default=False)
-    cancelled = models.BooleanField(default=False) 
+    cancelled = models.BooleanField(default=False)
 
     eating_time = models.TimeField(null=True, blank=True)
     grams = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+
+    # New fields for ingredients
+    ingredients_en = models.TextField(null=True, blank=True)  # Ingredients in English
+    ingredients_es = models.TextField(null=True, blank=True)  # Ingredients in Spanish
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.meal_type} on {self.daily_meal.date} - Completed: {self.completed}"
-
 
 

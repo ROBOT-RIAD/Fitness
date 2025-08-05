@@ -14,10 +14,11 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
+from rest_framework import generics, filters
+from django_filters.rest_framework import DjangoFilterBackend
 # Create your views here.
 
 from recipe.translate import translate_to_english,translate_to_spanish
-
 
 #openai
 import openai
@@ -31,6 +32,8 @@ from drf_yasg import openapi
 import uuid
 
 
+
+
 def ensure_unique_id(data: dict) -> str:
     """
     Guarantee there is a unique_id in `data` and return it.
@@ -39,6 +42,9 @@ def ensure_unique_id(data: dict) -> str:
     if not data.get("unique_id"):
         data["unique_id"] = str(uuid.uuid4())
     return data["unique_id"]
+
+
+
 
 class WorkoutAdminViewSet(ModelViewSet):
     queryset = Workout.objects.all()
@@ -174,6 +180,9 @@ class WorkoutAdminViewSet(ModelViewSet):
         workout.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+
+
+
 class WorkoutSpanishAdminViewSet(ModelViewSet):
     queryset = WorkoutSpanish.objects.all()
     serializer_class = WorkoutSpanishSerializer
@@ -294,6 +303,7 @@ class WorkoutSpanishAdminViewSet(ModelViewSet):
     
 
 
+
 class GetEnglishWorkoutByUniqueIdView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -316,7 +326,9 @@ class GetEnglishWorkoutByUniqueIdView(APIView):
         
         serializer = WorkoutSerializer(workout,context={'request': request})
         return Response(serializer.data, status=200)
-    
+
+
+
 
 class GetSpanishWorkoutByUniqueIdView(APIView):
     permission_classes = [IsAuthenticated]
@@ -340,6 +352,45 @@ class GetSpanishWorkoutByUniqueIdView(APIView):
         return Response(serializer.data, status=200)
 
 
+
+
+
+class WorkoutListAPIView(generics.ListAPIView):
+    permission_classes=[IsAuthenticated]
+    queryset = Workout.objects.all()
+    serializer_class = WorkoutSerializer
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter, DjangoFilterBackend]
+    search_fields = ['workout_name']
+    filterset_fields = ['for_body_part']
+    pagination_class=None
+
+    @swagger_auto_schema(
+        operation_description="Get a list of workouts, with optional filtering and search",
+        responses={200: WorkoutSerializer(many=True)},
+        tags=["ALL Workout"],
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+    
+
+
+
+class SpanishWorkoutListAPIView(generics.ListAPIView):
+    permission_classes=[IsAuthenticated]
+    queryset = WorkoutSpanish.objects.all()
+    serializer_class = WorkoutSpanishSerializer
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter, DjangoFilterBackend]
+    search_fields = ['workout_name']
+    filterset_fields = ['for_body_part']
+    pagination_class = None
+
+    @swagger_auto_schema(
+        operation_description="Get a list of workouts, with optional filtering and search",
+        responses={200: WorkoutSpanishSerializer(many=True)},
+        tags=["ALL Workout"],
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
 
 
 

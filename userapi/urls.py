@@ -6,10 +6,11 @@ from workoutplan.views import GenerateWorkoutPlanView,ActiveWorkoutPlanView,Comp
 from .views import UserFullInfoAPIView,UserSpanishFullInfoAPIView
 from meal.views import DaywiseMealInfoAPIView,SpanishDaywiseMealInfoAPIView,DailyMealDetailAPIView,SpanishDailyMealDetailAPIView,TodaysMealAPIView,SpanishTodaysMealAPIView,UpdateMealCompletionStatusAPIView
 from recipe.views import SingleRecipeDetailAPIView,SpanishSingleRecipeDetailAPIView,RecipeListView,SpanishRecipeListView
-from workout.views import GetEnglishWorkoutByUniqueIdView, GetSpanishWorkoutByUniqueIdView
-from home.views import TodayDailyDetailsAPIView
+from workout.views import GetEnglishWorkoutByUniqueIdView, GetSpanishWorkoutByUniqueIdView,WorkoutListAPIView,SpanishWorkoutListAPIView
+from home.views import TodayDailyDetailsAPIView,SpanishTodayDailyDetailsAPIView
 from accounts.views import DeleteUserView
-from completeinfo.views import FitnessProfileCreateView,UserAchievementDetailView
+from completeinfo.views import FitnessProfileCreateView,UserAchievementDetailView,Aifeedback
+
 router = DefaultRouter()
 
 
@@ -37,11 +38,15 @@ urlpatterns = [
     path('spanish-workouts/today/', SpanishWorkoutEntryListView.as_view(), name='spanish-today-workouts'),
     path('workout/update-today-entry/<int:pk>/',UpdateTodayWorkoutEntryAPIView.as_view(),name='update-today-workout-entry'),
     path('plans/today/', TodayDailyDetailsAPIView.as_view(), name='today-plans'),
+    path('spanish/plans/today/', SpanishTodayDailyDetailsAPIView.as_view(), name='today-plans'),
     path('recipes/', RecipeListView.as_view(), name='recipe-list'),
     path('spanish/recipes/', SpanishRecipeListView.as_view(), name='spanish-recipe-list'),
     path('delete-user/<int:pk>/', DeleteUserView.as_view(), name='delete-account'),
     path('create/', FitnessProfileCreateView.as_view(), name='create_fitness_profile'),
     path('achievement/details/', UserAchievementDetailView.as_view(), name='user-achievement-details'),
+    path('all/workouts/', WorkoutListAPIView.as_view(), name='workout-list'),
+    path('all/spanish/workouts/', SpanishWorkoutListAPIView.as_view(), name='spanish-workout-list'),
+    path('user/feedback/', Aifeedback.as_view(), name='user-feedback'),
     path('', include(router.urls)),
 ]
 

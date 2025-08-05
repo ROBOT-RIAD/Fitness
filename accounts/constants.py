@@ -4,10 +4,14 @@ ROLE_CHOICES=(
 )
 
 
+
+
 GENDER=(
     ('male','Male'),
     ('female','Female'),
 )
+
+
 
 
 FITNESS_LEVEL = (
@@ -17,6 +21,9 @@ FITNESS_LEVEL = (
     ('High', 'High'),
 )
 
+
+
+
 TRAINER_CHOICES = (
     ('At home', 'At Home'),
     ('At gym', 'At Gym'),
@@ -24,6 +31,9 @@ TRAINER_CHOICES = (
     ('Running', 'Running'),
     ('Other sports', 'Other Sports'),
 )
+
+
+
 
 AT_HOME_EQUIPMENT = (
     ('Dumbbells', 'Dumbbells'),
@@ -33,6 +43,9 @@ AT_HOME_EQUIPMENT = (
     ('No equipment', 'No Equipment'),
 )
 
+
+
+
 AT_GYM_EQUIPMENT = (
     ('Barbell', 'Barbell'),
     ('Squat rack', 'Squat Rack'),
@@ -40,17 +53,26 @@ AT_GYM_EQUIPMENT = (
     ('Smith machine', 'Smith Machine'),
 )
 
+
+
+
 SPORTS_CHOICES = (
     ('Running', 'Running'),
     ('Football', 'Football'),
     ('Swimming', 'Swimming'),
 )
 
+
+
+
 INTERESTED_WORKOUT = (
     ('Lose Fat', 'Lose Fat'),
     ('Gain Muscle', 'Gain Muscle (only if % is already low)'),
     ('Maintenance', 'Maintenance'),
 )
+
+
+
 
 ROUTINE_DURATION = (
     ('1 Month', '1 Month'),
@@ -59,6 +81,9 @@ ROUTINE_DURATION = (
     ('6 Month', '6 Month'),
     ('1 Year', '1 Year'),
 )
+
+
+
 
 DIETARY_PREFERENCES = (
     ('Keto', 'Keto'),
@@ -69,6 +94,9 @@ DIETARY_PREFERENCES = (
     ('No preferences', 'No Preferences'),
 )
 
+
+
+
 ALLERGIES = (
     ('Nuts', 'Nuts'),
     ('Dairy', 'Dairy'),
@@ -77,11 +105,17 @@ ALLERGIES = (
     ('No allergies', 'No Allergies'),
 )
 
+
+
+
 FOOD_PREFERENCE = (
     ('Egg', 'Egg'),
     ('Milk', 'Milk'),
     ('Fish', 'Fish'),
 )
+
+
+
 
 MEDICAL_CONDITIONS = (
     ('Diabetes', 'Diabetes'),
@@ -89,11 +123,17 @@ MEDICAL_CONDITIONS = (
     ('Heart disease', 'Heart Disease'),
 )
 
+
+
+
 FITNESS_GOALS = (
     ('Weight loss', 'Weight Loss'),
     ('Weight gain', 'Weight Gain'),
     ('Maintenance', 'Maintenance'),
 )
+
+
+
 
 LIFESTYLE_HABITS = (
     ('3 Meals', '3 Meals'),

@@ -2,6 +2,8 @@ from rest_framework import serializers
 from workout.models import  Workout
 from .models import WorkoutEntry
 
+
+
 class DelimitedListField(serializers.Field):
     """
     Accepts a comma‑separated string OR a JSON list and always returns list[str].
@@ -32,6 +34,8 @@ class DelimitedListField(serializers.Field):
         return ", ".join(map(str, value))
 
 
+
+
 class TrainingDataSerializer(serializers.Serializer):
     # Basic fields
     fitness_level       = serializers.CharField(max_length=50)
@@ -58,6 +62,8 @@ class TrainingDataSerializer(serializers.Serializer):
     lower_back   = DelimitedListField(required=False)
 
 
+
+
 class ExtendedFileField(serializers.FileField):
     def to_representation(self, value):
         if value:
@@ -68,11 +74,15 @@ class ExtendedFileField(serializers.FileField):
             return url
         return None
 
+
+
 class WorkoutSerializer(serializers.ModelSerializer):
     image = ExtendedFileField(required=False)
     class Meta:
         model = Workout
         fields = ['workout_name', 'time_needed', 'for_body_part', 'workout_type', 'calories_burn', 'equipment_needed', 'tag', 'image', 'benefits','unique_id']
+
+
 
 class WorkoutEntrySerializer(serializers.ModelSerializer):
     workout = WorkoutSerializer()
@@ -80,6 +90,7 @@ class WorkoutEntrySerializer(serializers.ModelSerializer):
     class Meta:
         model = WorkoutEntry
         fields = ['set_of', 'reps', 'completed', 'workout']
+
 
 
 
