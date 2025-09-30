@@ -6,7 +6,7 @@ class Recipe(models.Model):
     image = models.ImageField(upload_to='media/recipes/', null=True, blank=True)
     recipe_name = models.CharField(max_length=255)
     recipe_type = models.CharField(max_length=50)  # Example: Vegetarian, Non-Vegetarian, etc.
-    for_time = models.CharField(max_length=50)     # Example: Breakfast, Lunch, Dinner
+    for_time = models.CharField(max_length=150)     # Example: Breakfast, Lunch, Dinner
     tag = models.CharField(max_length=200, blank=True)  # Example: Spicy, Quick, Healthy
     calories = models.DecimalField(max_digits=12, decimal_places=2)
     carbs = models.DecimalField(max_digits=8, decimal_places=2)

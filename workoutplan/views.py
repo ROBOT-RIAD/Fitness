@@ -54,6 +54,15 @@ class GenerateWorkoutPlanView(APIView):
     )
     def post(self, request):
         user = request.user
+        
+        active_workout_plan = WorkoutPlan.objects.filter(
+            user=user,
+            is_completed=False,
+            is_cancelled=False,
+        ).first()
+
+        if active_workout_plan:
+            return Response({"detail": "User already has an active workout plan."}, status=409)
 
         # 1. Validate user profile
         try:

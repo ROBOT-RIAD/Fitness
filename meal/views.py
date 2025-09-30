@@ -32,7 +32,6 @@ MEAL_TYPE_TRANSLATIONS = {
 
 
 
-
 class GenerateMealPlanView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -64,6 +63,15 @@ class GenerateMealPlanView(APIView):
 
     def post(self, request):
         user = request.user
+        
+        active_meal_plan = MealPlan.objects.filter(
+            user=user,
+            is_completed=False,
+            is_cancelled=False,
+        ).first()
+
+        if active_meal_plan:
+            return Response({"detail": "User already has an active meal plan."}, status=409)
 
         # 1. Ensure user has profile
         try:

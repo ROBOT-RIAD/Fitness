@@ -36,3 +36,6 @@ class SubscriptionAdmin(admin.ModelAdmin):
     list_filter = ('status', 'is_active', 'cancel_at_period_end', 'created_at')
     search_fields = ('user__email', 'package_name', 'stripe_customer_id', 'stripe_subscription_id')
     ordering = ('-created_at',)
+
+
+    

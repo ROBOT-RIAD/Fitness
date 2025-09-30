@@ -121,13 +121,13 @@ Available recipes:
 """
 
     chat = openai.ChatCompletion.create(
-        model="gpt-4.1",
+        model="gpt-5-nano",
         response_format={"type": "json_object"},
         messages=[
             {"role": "system", "content": "You are a helpful meal-plan assistant."},
             {"role": "user", "content": prompt}
         ],
-        temperature=0.5
+        # temperature=0.5
     )
 
     response_json = json.loads(chat.choices[0].message.content)

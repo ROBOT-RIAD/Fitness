@@ -139,7 +139,7 @@ CHOICE_MAPPINGS = {
 }
 
 
-
+ 
 
 # Create your views here.
 class RegisterApiView(CreateAPIView):

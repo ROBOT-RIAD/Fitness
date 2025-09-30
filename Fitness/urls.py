@@ -28,7 +28,7 @@ schema_view = get_schema_view(
       default_version='v1',
       description="API documentation for my project",
       terms_of_service="https://www.example.com/terms/",
-      contact=openapi.Contact(email="support@example.com"),
+      contact=openapi.Contact(email="riadhosain420@gmail.com"),
       license=openapi.License(name="BSD License"),
    ),
    public=True,

@@ -37,6 +37,7 @@ SYSTEM_PROMPT = {
 }
 
 SESSION_CHAT_HISTORY = {}
+print(SESSION_CHAT_HISTORY)
 
 def get_requested_date(user_input):
     """
@@ -98,6 +99,9 @@ class StreamingChatAPIView(APIView):
 
         chat_history = SESSION_CHAT_HISTORY[session_id]
 
+        max_history_length = 5
+        chat_history = chat_history[-max_history_length:]
+
         requested_date = get_requested_date(user_input)
         print(requested_date)
         logger.info(f"Requested date for meal plan: {requested_date}")
@@ -118,7 +122,6 @@ class StreamingChatAPIView(APIView):
                 - subscapularis: {profile.subscapularis or 'Not provided'}
                 - triceps: {profile.triceps or 'Not provided'}
                 - fitness_level: {profile.fitness_level or 'Not provided'}
-                - trainer: {profile.trainer or 'Not provided'}
                 - interested_workout: {profile.interested_workout or 'Not provided'}
                 - injuries_discomfort: {profile.injuries_discomfort or 'Not provided'}
                 - medical_conditions: {profile.medical_conditions or 'Not provided'}
@@ -158,9 +161,9 @@ class StreamingChatAPIView(APIView):
         def event_stream():
             try:
                 response = openai.ChatCompletion.create(
-                    model="gpt-4.1",
+                    model="gpt-5-nano",
                     messages=chat_history,
-                    temperature=0.1,
+                    # temperature=0.1,
                     stream=True
                 )
 
@@ -236,9 +239,7 @@ class StreamingChatAPIView(APIView):
                                                 - Meal: {entry.meal_type}
                                                 - Recipe: {recipe.recipe_name}
                                                 - Type: {recipe.recipe_type}
-                                                - Category: {recipe.category}
                                                 - For: {recipe.for_time}
-                                                - Tags: {recipe.tag or 'None'}
                                                 - Eating Time: {entry.eating_time or 'Not specified'}
                                                 - Total Food Weight for Today: {entry.grams if entry.grams else 'Not specified'}
                                                 - Ingredients: {recipe.ingredients[:100] + '...' if recipe.ingredients else 'None'}
@@ -324,3 +325,8 @@ class StreamingChatAPIView(APIView):
                 workout_plan_summary = "Error retrieving workout plan data for today."
 
         return workout_plan_summary
+
+
+
+
+
